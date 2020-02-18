@@ -38,11 +38,14 @@ var viewMatrix = new Matrix4();
 var projMatrix = new Matrix4();
 var g_normalMatrix = new Matrix4();
 
-var ANGLE_STEP = 3.0;
 var AD_STEP = 0.2;
 var WS_STEP = 0.2;
+var ZX_STEP = 0.2;
 var AD_POS = 0;
 var WS_POS = 0;
+var ZX_POS = 0;
+
+var ANGLE_STEP = 3.0;
 var g_xAngle = 0.0;
 var g_yAngle = 0.0
 
@@ -123,6 +126,12 @@ function keydown(ev, gl, u_ModelMatrix, u_NormalMatrix, u_isLighting) {
             break;
         case 68: //d(right)
             AD_POS = AD_POS + AD_STEP;
+            break;
+        case 90: //Z(forwards)
+            ZX_POS = ZX_POS + ZX_STEP;
+            break;
+        case 88: //d(backwards)
+            ZX_POS = ZX_POS - ZX_STEP;
             break;
         default: return;
     }
@@ -279,11 +288,12 @@ function initAxesVertexBuffers(gl) {
       return;
     }
   
-    modelMatrix.setTranslate(AD_POS, WS_POS, 0);  
+    modelMatrix.setTranslate(AD_POS, WS_POS, ZX_POS);  
     modelMatrix.rotate(g_yAngle, 0, 1, 0); 
     modelMatrix.rotate(g_xAngle, 1, 0, 0);
     
     buildChair(gl, u_ModelMatrix, u_NormalMatrix, u_isLighting, n);
+    buildFloor(gl, u_ModelMatrix, u_NormalMatrix, u_isLighting, n);
     
   }
   
@@ -336,5 +346,12 @@ function initAxesVertexBuffers(gl) {
     modelMatrix.scale(0.5, 2.0, 0.5);
     drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
     modelMatrix = popMatrix();
+  }
 
+  function buildFloor(gl, u_ModelMatrix, u_NormalMatrix, u_isLighting, n) {
+    pushMatrix(modelMatrix);
+    modelMatrix.translate(0, -2.04, 0);
+    modelMatrix.scale(6.0, 0.1, 6.0); 
+    drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
+    modelMatrix = popMatrix();
   }
