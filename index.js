@@ -291,7 +291,8 @@ function initAxesVertexBuffers(gl) {
     modelMatrix.rotate(g_yAngle, 0, 1, 0); 
     modelMatrix.rotate(g_xAngle, 1, 0, 0);
     
-    buildChair(gl, u_ModelMatrix, u_NormalMatrix, u_isLighting, initVertexBuffers(gl, 0.55, 0.35, 0.1));
+    buildChair(gl, u_ModelMatrix, u_NormalMatrix, u_isLighting, initVertexBuffers(gl, 0.55, 0.35, 0.1), 0, 0, 0);
+    buildChair(gl, u_ModelMatrix, u_NormalMatrix, u_isLighting, initVertexBuffers(gl, 0.55, 0.35, 0.1), 3, 1.25, -0.75);
     buildFloor(gl, u_ModelMatrix, u_NormalMatrix, u_isLighting, initVertexBuffers(gl, 1, 0, 0));
     
   }
@@ -310,38 +311,39 @@ function initAxesVertexBuffers(gl) {
     modelMatrix = popMatrix();
   }
 
-  function buildChair(gl, u_ModelMatrix, u_NormalMatrix, u_isLighting, n) {
+  function buildChair(gl, u_ModelMatrix, u_NormalMatrix, u_isLighting, n, translate_x, translate_y, translate_z) {
     pushMatrix(modelMatrix);
+    modelMatrix.translate(translate_x, translate_y, translate_z);
     modelMatrix.scale(2.0, 0.5, 2.0); 
     drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
     modelMatrix = popMatrix();
   
     pushMatrix(modelMatrix);
-    modelMatrix.translate(0, 1.25, -0.75);  
+    modelMatrix.translate(translate_x, translate_y+1.25, translate_z-0.75);  
     modelMatrix.scale(2.0, 2.0, 0.5);
     drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
     modelMatrix = popMatrix();
 
     pushMatrix(modelMatrix);
-    modelMatrix.translate(0.75, -1, 0.75);  
+    modelMatrix.translate(translate_x+0.75, translate_y-1, translate_z+0.75);  
     modelMatrix.scale(0.5, 2.0, 0.5);
     drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
     modelMatrix = popMatrix();
 
     pushMatrix(modelMatrix);
-    modelMatrix.translate(-0.75, -1, 0.75);  
+    modelMatrix.translate(translate_x-0.75, translate_y-1, translate_z+0.75);  
     modelMatrix.scale(0.5, 2.0, 0.5);
     drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
     modelMatrix = popMatrix();
 
     pushMatrix(modelMatrix);
-    modelMatrix.translate(0.75, -1, -0.75);  
+    modelMatrix.translate(translate_x+0.75, translate_y-1, translate_z-0.75);  
     modelMatrix.scale(0.5, 2.0, 0.5);
     drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
     modelMatrix = popMatrix();
 
     pushMatrix(modelMatrix);
-    modelMatrix.translate(-0.75, -1, -0.75);  
+    modelMatrix.translate(translate_x-0.75, translate_y-1, translate_z-0.75);  
     modelMatrix.scale(0.5, 2.0, 0.5);
     drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
     modelMatrix = popMatrix();
