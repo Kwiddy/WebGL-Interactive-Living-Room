@@ -38,12 +38,15 @@ var viewMatrix = new Matrix4();
 var projMatrix = new Matrix4();
 var g_normalMatrix = new Matrix4();
 
-var AD_STEP = 0.2;
-var WS_STEP = 0.2;
-var ZX_STEP = 0.2;
-var AD_POS = 0;
-var WS_POS = 0;
-var ZX_POS = -10;
+var a1_View = 0;
+var a2_View = 0;
+var a3_View = 15;
+var b1_View = 0;
+var b2_View = 0;
+var b3_View = -100;
+var c1_View = 0;
+var c2_View = 1;
+var c3_View = 0;
 
 var ANGLE_STEP = 3.0;
 var g_xAngle = 0.0;
@@ -89,19 +92,19 @@ function main() {
     lightDirection.normalize();
     gl.uniform3fv(u_LightDirection, lightDirection.elements);
 
-    viewMatrix.setLookAt(0, 0, 15, 0, 0, -100, 0, 1, 0);
+    viewMatrix.setLookAt(a1_View, a2_View, a3_View, b1_View, b2_View, b3_View, c1_View, c2_View, c3_View);
     projMatrix.setPerspective(30, canvas.width/canvas.height, 1, 100);
     gl.uniformMatrix4fv(u_ViewMatrix, false, viewMatrix.elements);
     gl.uniformMatrix4fv(u_ProjMatrix, false, projMatrix.elements);
 
     document.onkeydown = function(ev) {
-        keydown(ev, gl, u_ModelMatrix, u_NormalMatrix, u_isLighting);
+        keydown(ev, gl, u_ModelMatrix, u_NormalMatrix, u_isLighting, u_ViewMatrix);
     };
 
     draw(gl, u_ModelMatrix, u_NormalMatrix, u_isLighting);
 };
 
-function keydown(ev, gl, u_ModelMatrix, u_NormalMatrix, u_isLighting) {
+function keydown(ev, gl, u_ModelMatrix, u_NormalMatrix, u_isLighting, u_ViewMatrix) {
     switch (ev.keyCode) {
         case 40: //up
             g_xAngle = (g_xAngle + ANGLE_STEP) % 360;
@@ -116,25 +119,27 @@ function keydown(ev, gl, u_ModelMatrix, u_NormalMatrix, u_isLighting) {
             g_yAngle = (g_yAngle + ANGLE_STEP) % 360;
             break;
         case 65: //a(left)
-            AD_POS = AD_POS - AD_STEP;
+            a1_View += 0.25
             break;
         case 87: //w(up)
-            WS_POS = WS_POS + WS_STEP;
+            a2_View -= 0.25
             break;
         case 83: //s(down)
-            WS_POS = WS_POS - WS_STEP;
+            a2_View += 0.25
             break;
         case 68: //d(right)
-            AD_POS = AD_POS + AD_STEP;
+            a1_View -= 0.25;
             break;
         case 90: //Z(forwards)
-            ZX_POS = ZX_POS + ZX_STEP;
+            a3_View -= 0.25
             break;
         case 88: //d(backwards)
-            ZX_POS = ZX_POS - ZX_STEP;
+            a3_View += 0.25
             break;
         default: return;
     }
+    viewMatrix.setLookAt(a1_View, a2_View, a3_View, b1_View, b2_View, b3_View, c1_View, c2_View, c3_View);
+    gl.uniformMatrix4fv(u_ViewMatrix, false, viewMatrix.elements);
     draw(gl, u_ModelMatrix, u_NormalMatrix, u_isLighting);
 }
 
@@ -282,7 +287,7 @@ function initAxesVertexBuffers(gl) {
    
     gl.uniform1i(u_isLighting, true); 
   
-    modelMatrix.setTranslate(AD_POS, WS_POS, ZX_POS);  
+    modelMatrix.setTranslate(0, 0, 0);  
     modelMatrix.rotate(g_yAngle, 0, 1, 0); 
     modelMatrix.rotate(g_xAngle, 1, 0, 0);
     
