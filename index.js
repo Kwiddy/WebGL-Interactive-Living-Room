@@ -39,6 +39,10 @@ var projMatrix = new Matrix4();
 var g_normalMatrix = new Matrix4();
 
 var ANGLE_STEP = 3.0;
+var AD_STEP = 0.2;
+var WS_STEP = 0.2;
+var AD_POS = 0;
+var WS_POS = 0;
 var g_xAngle = 0.0;
 var g_yAngle = 0.0
 
@@ -56,7 +60,7 @@ function main() {
       return;
     }
 
-    gl.clearColor(0.0, 0.0, 0.0, 1.0);
+    gl.clearColor(0.0, 0.0, 0.0, 0.1);
     gl.enable(gl.DEPTH_TEST);
 
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
@@ -107,6 +111,18 @@ function keydown(ev, gl, u_ModelMatrix, u_NormalMatrix, u_isLighting) {
             break;
         case 39: //right
             g_yAngle = (g_yAngle + ANGLE_STEP) % 360;
+            break;
+        case 65: //a(left)
+            AD_POS = AD_POS - AD_STEP;
+            break;
+        case 87: //w(up)
+            WS_POS = WS_POS + WS_STEP;
+            break;
+        case 83: //s(down)
+            WS_POS = WS_POS - WS_STEP;
+            break;
+        case 68: //d(right)
+            AD_POS = AD_POS + AD_STEP;
             break;
         default: return;
     }
@@ -254,13 +270,7 @@ function initAxesVertexBuffers(gl) {
       console.log('Failed to set the vertex information');
       return;
     }
-  
-    modelMatrix.setTranslate(0, 0, 0);  
-
-    gl.uniformMatrix4fv(u_ModelMatrix, false, modelMatrix.elements);
-  
-    gl.drawArrays(gl.LINES, 0, n);
-  
+   
     gl.uniform1i(u_isLighting, true); 
   
     var n = initVertexBuffers(gl);
@@ -269,7 +279,7 @@ function initAxesVertexBuffers(gl) {
       return;
     }
   
-    modelMatrix.setTranslate(0, 0, 0);  
+    modelMatrix.setTranslate(AD_POS, WS_POS, 0);  
     modelMatrix.rotate(g_yAngle, 0, 1, 0); 
     modelMatrix.rotate(g_xAngle, 1, 0, 0);
     
