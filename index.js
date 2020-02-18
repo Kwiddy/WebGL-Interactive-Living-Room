@@ -43,7 +43,7 @@ var WS_STEP = 0.2;
 var ZX_STEP = 0.2;
 var AD_POS = 0;
 var WS_POS = 0;
-var ZX_POS = 0;
+var ZX_POS = -10;
 
 var ANGLE_STEP = 3.0;
 var g_xAngle = 0.0;
@@ -138,41 +138,41 @@ function keydown(ev, gl, u_ModelMatrix, u_NormalMatrix, u_isLighting) {
     draw(gl, u_ModelMatrix, u_NormalMatrix, u_isLighting);
 }
 
-function initVertexBuffers(gl) {
+function initVertexBuffers(gl, rVal, gVal, bVal) {
     var vertices = new Float32Array([   
-        0.5, 0.5, 0.5,  -0.5, 0.5, 0.5,  -0.5,-0.5, 0.5,   0.5,-0.5, 0.5, 
-        0.5, 0.5, 0.5,   0.5,-0.5, 0.5,   0.5,-0.5,-0.5,   0.5, 0.5,-0.5, 
-        0.5, 0.5, 0.5,   0.5, 0.5,-0.5,  -0.5, 0.5,-0.5,  -0.5, 0.5, 0.5, 
-       -0.5, 0.5, 0.5,  -0.5, 0.5,-0.5,  -0.5,-0.5,-0.5,  -0.5,-0.5, 0.5, 
-       -0.5,-0.5,-0.5,   0.5,-0.5,-0.5,   0.5,-0.5, 0.5,  -0.5,-0.5, 0.5, 
-        0.5,-0.5,-0.5,  -0.5,-0.5,-0.5,  -0.5, 0.5,-0.5,   0.5, 0.5,-0.5  
-     ]);
-   
-     var colors = new Float32Array([    
-       1, 0, 0,   1, 0, 0,   1, 0, 0,  1, 0, 0,     
-       1, 0, 0,   1, 0, 0,   1, 0, 0,  1, 0, 0,     
-       1, 0, 0,   1, 0, 0,   1, 0, 0,  1, 0, 0,     
-       1, 0, 0,   1, 0, 0,   1, 0, 0,  1, 0, 0,     
-       1, 0, 0,   1, 0, 0,   1, 0, 0,  1, 0, 0,     
-       1, 0, 0,   1, 0, 0,   1, 0, 0,  1, 0, 0　    
+      0.5, 0.5, 0.5,  -0.5, 0.5, 0.5,  -0.5,-0.5, 0.5,   0.5,-0.5, 0.5, 
+      0.5, 0.5, 0.5,   0.5,-0.5, 0.5,   0.5,-0.5,-0.5,   0.5, 0.5,-0.5, 
+      0.5, 0.5, 0.5,   0.5, 0.5,-0.5,  -0.5, 0.5,-0.5,  -0.5, 0.5, 0.5, 
+      -0.5, 0.5, 0.5,  -0.5, 0.5,-0.5,  -0.5,-0.5,-0.5,  -0.5,-0.5, 0.5, 
+      -0.5,-0.5,-0.5,   0.5,-0.5,-0.5,   0.5,-0.5, 0.5,  -0.5,-0.5, 0.5, 
+      0.5,-0.5,-0.5,  -0.5,-0.5,-0.5,  -0.5, 0.5,-0.5,   0.5, 0.5,-0.5  
+    ]);
+  
+    var colors = new Float32Array([    
+      rVal, gVal, bVal,   rVal, gVal, bVal,   rVal, gVal, bVal,  rVal, gVal, bVal,     
+      rVal, gVal, bVal,   rVal, gVal, bVal,   rVal, gVal, bVal,  rVal, gVal, bVal,     
+      rVal, gVal, bVal,   rVal, gVal, bVal,   rVal, gVal, bVal,  rVal, gVal, bVal,     
+      rVal, gVal, bVal,   rVal, gVal, bVal,   rVal, gVal, bVal,  rVal, gVal, bVal,     
+      rVal, gVal, bVal,   rVal, gVal, bVal,   rVal, gVal, bVal,  rVal, gVal, bVal,     
+      rVal, gVal, bVal,   rVal, gVal, bVal,   rVal, gVal, bVal,  rVal, gVal, bVal　    
+    ]);
+    
+    var normals = new Float32Array([    
+      0.0, 0.0, 1.0,   0.0, 0.0, 1.0,   0.0, 0.0, 1.0,   0.0, 0.0, 1.0,  
+      1.0, 0.0, 0.0,   1.0, 0.0, 0.0,   1.0, 0.0, 0.0,   1.0, 0.0, 0.0,  
+      0.0, 1.0, 0.0,   0.0, 1.0, 0.0,   0.0, 1.0, 0.0,   0.0, 1.0, 0.0,  
+      -1.0, 0.0, 0.0,  -1.0, 0.0, 0.0,  -1.0, 0.0, 0.0,  -1.0, 0.0, 0.0,  
+      0.0,-1.0, 0.0,   0.0,-1.0, 0.0,   0.0,-1.0, 0.0,   0.0,-1.0, 0.0,  
+      0.0, 0.0,-1.0,   0.0, 0.0,-1.0,   0.0, 0.0,-1.0,   0.0, 0.0,-1.0   
     ]);
    
-     var normals = new Float32Array([    
-       0.0, 0.0, 1.0,   0.0, 0.0, 1.0,   0.0, 0.0, 1.0,   0.0, 0.0, 1.0,  
-       1.0, 0.0, 0.0,   1.0, 0.0, 0.0,   1.0, 0.0, 0.0,   1.0, 0.0, 0.0,  
-       0.0, 1.0, 0.0,   0.0, 1.0, 0.0,   0.0, 1.0, 0.0,   0.0, 1.0, 0.0,  
-      -1.0, 0.0, 0.0,  -1.0, 0.0, 0.0,  -1.0, 0.0, 0.0,  -1.0, 0.0, 0.0,  
-       0.0,-1.0, 0.0,   0.0,-1.0, 0.0,   0.0,-1.0, 0.0,   0.0,-1.0, 0.0,  
-       0.0, 0.0,-1.0,   0.0, 0.0,-1.0,   0.0, 0.0,-1.0,   0.0, 0.0,-1.0   
-     ]);
-   
-     var indices = new Uint8Array([
-        0, 1, 2,   0, 2, 3,    
-        4, 5, 6,   4, 6, 7,    
-        8, 9,10,   8,10,11,    
-       12,13,14,  12,14,15,    
-       16,17,18,  16,18,19,    
-       20,21,22,  20,22,23     
+    var indices = new Uint8Array([
+      0, 1, 2,   0, 2, 3,    
+      4, 5, 6,   4, 6, 7,    
+      8, 9,10,   8,10,11,    
+      12,13,14,  12,14,15,    
+      16,17,18,  16,18,19,    
+      20,21,22,  20,22,23     
     ]);
 
     if (!initArrayBuffer(gl, 'a_Position', vertices, 3, gl.FLOAT)) return -1;
@@ -282,18 +282,12 @@ function initAxesVertexBuffers(gl) {
    
     gl.uniform1i(u_isLighting, true); 
   
-    var n = initVertexBuffers(gl);
-    if (n < 0) {
-      console.log('Failed to set the vertex information');
-      return;
-    }
-  
     modelMatrix.setTranslate(AD_POS, WS_POS, ZX_POS);  
     modelMatrix.rotate(g_yAngle, 0, 1, 0); 
     modelMatrix.rotate(g_xAngle, 1, 0, 0);
     
-    buildChair(gl, u_ModelMatrix, u_NormalMatrix, u_isLighting, n);
-    buildFloor(gl, u_ModelMatrix, u_NormalMatrix, u_isLighting, n);
+    buildChair(gl, u_ModelMatrix, u_NormalMatrix, u_isLighting, initVertexBuffers(gl, 0.55, 0.35, 0.1));
+    buildFloor(gl, u_ModelMatrix, u_NormalMatrix, u_isLighting, initVertexBuffers(gl, 1, 0, 0));
     
   }
   
