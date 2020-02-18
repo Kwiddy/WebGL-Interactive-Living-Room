@@ -40,7 +40,7 @@ var g_normalMatrix = new Matrix4();
 
 var a1_View = 0;
 var a2_View = 0;
-var a3_View = 15;
+var a3_View = 50;
 var b1_View = 0;
 var b2_View = 0;
 var b3_View = -100;
@@ -350,7 +350,7 @@ function initAxesVertexBuffers(gl) {
   function buildFloor(gl, u_ModelMatrix, u_NormalMatrix, u_isLighting, n) {
     pushMatrix(modelMatrix);
     modelMatrix.translate(0, -2.04, 0);
-    modelMatrix.scale(6.0, 0.1, 6.0); 
+    modelMatrix.scale(20.0, 0.1, 20.0); 
     drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
     modelMatrix = popMatrix();
   }
