@@ -38,6 +38,8 @@ var viewMatrix = new Matrix4();
 var projMatrix = new Matrix4();
 var g_normalMatrix = new Matrix4();
 
+var g_matrixStack = []; 
+
 var a1_View = 0;
 var a2_View = 0;
 var a3_View = 50;
@@ -49,7 +51,7 @@ var c2_View = 1;
 var c3_View = 0;
 
 var ANGLE_STEP = 3.0;
-var g_xAngle = 0.0;
+var g_xAngle = 15.0;
 var g_yAngle = 0.0
 
 function main() {
@@ -67,9 +69,9 @@ function main() {
     }
 
     gl.clearColor(0.0, 0.0, 0.0, 0.1);
-    gl.enable(gl.DEPTH_TEST);
-
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+
+    gl.enable(gl.DEPTH_TEST);
 
     var u_ModelMatrix = gl.getUniformLocation(gl.program, 'u_ModelMatrix');
     var u_ViewMatrix = gl.getUniformLocation(gl.program, 'u_ViewMatrix');
@@ -80,9 +82,7 @@ function main() {
 
     var u_isLighting = gl.getUniformLocation(gl.program, 'u_isLighting');
 
-    if (!u_ModelMatrix || !u_ViewMatrix || !u_NormalMatrix ||
-        !u_ProjMatrix || !u_LightColor || !u_LightDirection ||
-        !u_isLighting ) { 
+    if (!u_ModelMatrix || !u_ViewMatrix || !u_NormalMatrix || !u_ProjMatrix || !u_LightColor || !u_LightDirection || !u_isLighting ) { 
       console.log('Failed to Get the storage locations of u_ModelMatrix, u_ViewMatrix, and/or u_ProjMatrix');
       return;
     }
@@ -93,7 +93,7 @@ function main() {
     gl.uniform3fv(u_LightDirection, lightDirection.elements);
 
     viewMatrix.setLookAt(a1_View, a2_View, a3_View, b1_View, b2_View, b3_View, c1_View, c2_View, c3_View);
-    projMatrix.setPerspective(30, canvas.width/canvas.height, 1, 100);
+    projMatrix.setPerspective(45, canvas.width/canvas.height, 1, 100);
     gl.uniformMatrix4fv(u_ViewMatrix, false, viewMatrix.elements);
     gl.uniformMatrix4fv(u_ProjMatrix, false, projMatrix.elements);
 
@@ -263,7 +263,6 @@ function initAxesVertexBuffers(gl) {
     return n;
 }
   
-var g_matrixStack = []; 
 function pushMatrix(m) { 
   var m2 = new Matrix4(m);
   g_matrixStack.push(m2);
@@ -369,7 +368,7 @@ function buildChair(gl, u_ModelMatrix, u_NormalMatrix, u_isLighting, n, translat
 function buildFloor(gl, u_ModelMatrix, u_NormalMatrix, u_isLighting, n) {
   pushMatrix(modelMatrix);
   modelMatrix.translate(0, -2.04, 0);
-  modelMatrix.scale(20.0, 0.1, 20.0); 
+  modelMatrix.scale(25.0, 0.1, 25.0); 
   drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
   modelMatrix = popMatrix();
 }
