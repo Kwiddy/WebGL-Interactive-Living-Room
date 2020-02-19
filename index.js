@@ -261,98 +261,134 @@ function initAxesVertexBuffers(gl) {
     gl.bindBuffer(gl.ARRAY_BUFFER, null);
   
     return n;
-  }
+}
   
-  var g_matrixStack = []; 
-  function pushMatrix(m) { 
-    var m2 = new Matrix4(m);
-    g_matrixStack.push(m2);
-  }
-  
-  function popMatrix() { 
-    return g_matrixStack.pop();
-  }
-  
-  function draw(gl, u_ModelMatrix, u_NormalMatrix, u_isLighting) {
-  
-    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-  
-    gl.uniform1i(u_isLighting, false); 
-    
-    var n = initAxesVertexBuffers(gl);
-    if (n < 0) {
-      console.log('Failed to set the vertex information');
-      return;
-    }
-   
-    gl.uniform1i(u_isLighting, true); 
-  
-    modelMatrix.setTranslate(0, 0, 0);  
-    modelMatrix.rotate(g_yAngle, 0, 1, 0); 
-    modelMatrix.rotate(g_xAngle, 1, 0, 0);
-    
-    buildChair(gl, u_ModelMatrix, u_NormalMatrix, u_isLighting, initVertexBuffers(gl, 0.55, 0.35, 0.1), 0, 0, 0);
-    buildChair(gl, u_ModelMatrix, u_NormalMatrix, u_isLighting, initVertexBuffers(gl, 0.55, 0.35, 0.1), 3, 1.25, -0.75);
-    buildFloor(gl, u_ModelMatrix, u_NormalMatrix, u_isLighting, initVertexBuffers(gl, 1, 0, 0));
-    
-  }
-  
-  function drawbox(gl, u_ModelMatrix, u_NormalMatrix, n) {
-    pushMatrix(modelMatrix);
-  
-      gl.uniformMatrix4fv(u_ModelMatrix, false, modelMatrix.elements);
-  
-      g_normalMatrix.setInverseOf(modelMatrix);
-      g_normalMatrix.transpose();
-      gl.uniformMatrix4fv(u_NormalMatrix, false, g_normalMatrix.elements);
-  
-      gl.drawElements(gl.TRIANGLES, n, gl.UNSIGNED_BYTE, 0);
-  
-    modelMatrix = popMatrix();
-  }
+var g_matrixStack = []; 
+function pushMatrix(m) { 
+  var m2 = new Matrix4(m);
+  g_matrixStack.push(m2);
+}
 
-  function buildChair(gl, u_ModelMatrix, u_NormalMatrix, u_isLighting, n, translate_x, translate_y, translate_z) {
-    pushMatrix(modelMatrix);
-    modelMatrix.translate(translate_x, translate_y, translate_z);
-    modelMatrix.scale(2.0, 0.5, 2.0); 
-    drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
-    modelMatrix = popMatrix();
+function popMatrix() { 
+  return g_matrixStack.pop();
+}
+
+function draw(gl, u_ModelMatrix, u_NormalMatrix, u_isLighting) {
+
+  gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+
+  gl.uniform1i(u_isLighting, false); 
   
-    pushMatrix(modelMatrix);
-    modelMatrix.translate(translate_x, translate_y+1.25, translate_z-0.75);  
-    modelMatrix.scale(2.0, 2.0, 0.5);
-    drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
-    modelMatrix = popMatrix();
-
-    pushMatrix(modelMatrix);
-    modelMatrix.translate(translate_x+0.75, translate_y-1, translate_z+0.75);  
-    modelMatrix.scale(0.5, 2.0, 0.5);
-    drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
-    modelMatrix = popMatrix();
-
-    pushMatrix(modelMatrix);
-    modelMatrix.translate(translate_x-0.75, translate_y-1, translate_z+0.75);  
-    modelMatrix.scale(0.5, 2.0, 0.5);
-    drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
-    modelMatrix = popMatrix();
-
-    pushMatrix(modelMatrix);
-    modelMatrix.translate(translate_x+0.75, translate_y-1, translate_z-0.75);  
-    modelMatrix.scale(0.5, 2.0, 0.5);
-    drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
-    modelMatrix = popMatrix();
-
-    pushMatrix(modelMatrix);
-    modelMatrix.translate(translate_x-0.75, translate_y-1, translate_z-0.75);  
-    modelMatrix.scale(0.5, 2.0, 0.5);
-    drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
-    modelMatrix = popMatrix();
+  var n = initAxesVertexBuffers(gl);
+  if (n < 0) {
+    console.log('Failed to set the vertex information');
+    return;
   }
+  
+  gl.uniform1i(u_isLighting, true); 
 
-  function buildFloor(gl, u_ModelMatrix, u_NormalMatrix, u_isLighting, n) {
-    pushMatrix(modelMatrix);
-    modelMatrix.translate(0, -2.04, 0);
-    modelMatrix.scale(20.0, 0.1, 20.0); 
-    drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
-    modelMatrix = popMatrix();
-  }
+  modelMatrix.setTranslate(0, 0, 0);  
+  modelMatrix.rotate(g_yAngle, 0, 1, 0); 
+  modelMatrix.rotate(g_xAngle, 1, 0, 0);
+
+  buildScene(gl, u_ModelMatrix, u_NormalMatrix, u_isLighting);   
+}
+
+function drawbox(gl, u_ModelMatrix, u_NormalMatrix, n) {
+  pushMatrix(modelMatrix);
+
+    gl.uniformMatrix4fv(u_ModelMatrix, false, modelMatrix.elements);
+
+    g_normalMatrix.setInverseOf(modelMatrix);
+    g_normalMatrix.transpose();
+    gl.uniformMatrix4fv(u_NormalMatrix, false, g_normalMatrix.elements);
+
+    gl.drawElements(gl.TRIANGLES, n, gl.UNSIGNED_BYTE, 0);
+
+  modelMatrix = popMatrix();
+}
+
+function buildChair(gl, u_ModelMatrix, u_NormalMatrix, u_isLighting, n, translate_x, translate_y, translate_z) {
+  pushMatrix(modelMatrix);
+  modelMatrix.translate(translate_x, translate_y, translate_z);
+  modelMatrix.scale(2.0, 0.5, 2.0); 
+  drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
+  modelMatrix = popMatrix();
+
+  pushMatrix(modelMatrix);
+  modelMatrix.translate(translate_x, translate_y+1.25, translate_z-0.75);  
+  modelMatrix.scale(2.0, 2.0, 0.5);
+  drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
+  modelMatrix = popMatrix();
+
+  pushMatrix(modelMatrix);
+  modelMatrix.translate(translate_x+0.75, translate_y-1, translate_z+0.75);  
+  modelMatrix.scale(0.5, 2.0, 0.5);
+  drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
+  modelMatrix = popMatrix();
+
+  pushMatrix(modelMatrix);
+  modelMatrix.translate(translate_x-0.75, translate_y-1, translate_z+0.75);  
+  modelMatrix.scale(0.5, 2.0, 0.5);
+  drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
+  modelMatrix = popMatrix();
+
+  pushMatrix(modelMatrix);
+  modelMatrix.translate(translate_x+0.75, translate_y-1, translate_z-0.75);  
+  modelMatrix.scale(0.5, 2.0, 0.5);
+  drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
+  modelMatrix = popMatrix();
+
+  pushMatrix(modelMatrix);
+  modelMatrix.translate(translate_x-0.75, translate_y-1, translate_z-0.75);  
+  modelMatrix.scale(0.5, 2.0, 0.5);
+  drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
+  modelMatrix = popMatrix();
+}
+
+function buildFloor(gl, u_ModelMatrix, u_NormalMatrix, u_isLighting, n) {
+  pushMatrix(modelMatrix);
+  modelMatrix.translate(0, -2.04, 0);
+  modelMatrix.scale(20.0, 0.1, 20.0); 
+  drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
+  modelMatrix = popMatrix();
+}
+
+function buildTable(gl, u_ModelMatrix, u_NormalMatrix, u_isLighting, n, translate_x, translate_y, translate_z) {
+  pushMatrix(modelMatrix);
+  modelMatrix.translate(translate_x, translate_y, translate_z);
+  modelMatrix.scale(6.5, 0.5, 5.0); 
+  drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
+  modelMatrix = popMatrix();
+
+  pushMatrix(modelMatrix);
+  modelMatrix.translate(translate_x-2.5, translate_y-1.5, translate_z-1.5);  
+  modelMatrix.scale(0.5, 3.5, 0.5);
+  drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
+  modelMatrix = popMatrix();
+
+  pushMatrix(modelMatrix);
+  modelMatrix.translate(translate_x-2.5, translate_y-1.5, translate_z+1.5);  
+  modelMatrix.scale(0.5, 3.5, 0.5);
+  drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
+  modelMatrix = popMatrix();
+
+  pushMatrix(modelMatrix);
+  modelMatrix.translate(translate_x+2.5, translate_y-1.5, translate_z-1.5);  
+  modelMatrix.scale(0.5, 3.5, 0.5);
+  drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
+  modelMatrix = popMatrix();
+
+  pushMatrix(modelMatrix);
+  modelMatrix.translate(translate_x+2.5, translate_y-1.5, translate_z+1.5);  
+  modelMatrix.scale(0.5, 3.5, 0.5);
+  drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
+  modelMatrix = popMatrix();
+}
+
+function buildScene(gl, u_ModelMatrix, u_NormalMatrix, u_isLighting) {
+  buildChair(gl, u_ModelMatrix, u_NormalMatrix, u_isLighting, initVertexBuffers(gl, 0.55, 0.35, 0.1), 0, 0, 0);
+  buildChair(gl, u_ModelMatrix, u_NormalMatrix, u_isLighting, initVertexBuffers(gl, 0.55, 0.35, 0.1), 3, 0, 0);
+  buildTable(gl, u_ModelMatrix, u_NormalMatrix, u_isLighting, initVertexBuffers(gl, 0, 0, 0), 1.5, 1.25, 3.75);
+  buildFloor(gl, u_ModelMatrix, u_NormalMatrix, u_isLighting, initVertexBuffers(gl, 1, 0, 0));
+}
