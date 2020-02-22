@@ -137,6 +137,10 @@ function nextPowerof2(value) {
   return Math.pow(2, Math.ceil(Math.log(value) / Math.log(2)));
 }
 
+function isPowerof2(value) {
+  return (value & (value - 1)) === 0;
+}
+
 function keydown(ev, gl, u_ModelMatrix, u_NormalMatrix, u_isLighting, u_ViewMatrix) {
     switch (ev.keyCode) {
         case 40: //up
@@ -345,18 +349,20 @@ function drawTexture(gl, n, image, u_Sampler, u_UseTextures, texture){
   gl.activeTexture(gl.TEXTURE0);
   gl.bindTexture(gl.TEXTURE_2D, texture);
 
-  // try {
-  //   gl.texImage2D(gl.TEXTURE_2D, 0, gl.RBG, gl.RBG, gl.UNSIGNED_BYTE, texture.image);
-  // } catch(e) {
-  //   console.log(e);
-  // }
+  try {
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
+  } catch(e) {
+      console.log(typeof(image));
+      console.log(e);
+  }
 
-  console.log(typeof(image));
-  gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
-
-  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
-  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+  if(isPowerof2(image.width) && isPowerof2(image.height)) {
+    gl.generateMipmap(gl.TEXTURE_2D);
+  } else {
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+  }
 
   gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
   gl.uniform1i(u_Sampler, 0);
