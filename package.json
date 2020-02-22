@@ -1,0 +1,27 @@
+{
+  "name": "coursework",
+  "version": "1.0.0",
+  "description": "Computer Graphics Coursework 19/20",
+  "main": "index.js",
+  "directories": {
+    "lib": "lib"
+  },
+  "scripts": {
+    "test": "npm start",
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Kwiddy/ComputerGraphicsYr2.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Kwiddy/ComputerGraphicsYr2/issues"
+  },
+  "homepage": "https://github.com/Kwiddy/ComputerGraphicsYr2#readme",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.17.1"
+  }
+}
