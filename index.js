@@ -9,12 +9,15 @@ var VSHADER_SOURCE =
   'uniform vec3 u_LightColor;\n' +     
   'uniform vec3 u_AmbientLight;\n' +
   'uniform vec3 u_LightDirection;\n' + 
+  'uniform vec3 u_LightPosition;\n' +
   'varying vec4 v_Color;\n' +
   'uniform bool u_isLighting;\n' +
   'void main() {\n' +
   '  gl_Position = u_ProjMatrix * u_ViewMatrix * u_ModelMatrix * a_Position;\n' +
   '  if(u_isLighting)\n' + 
   '  {\n' +
+  '     vec4 vertexPosition = u_ModelMatrix * a_Position;\n' +
+  '     vec3 lightDirection = normalize(u_LightPosition - vec3(vertexPosition));\n' +
   '     vec3 normal = normalize((u_NormalMatrix * a_Normal).xyz);\n' +
   '     float nDotL = max(dot(normal, u_LightDirection), 0.0);\n' +
   '     vec3 diffuse = u_LightColor * a_Color.rgb * nDotL;\n' +
@@ -53,7 +56,7 @@ var c1_View = 0;
 var c2_View = 1;
 var c3_View = 0;
 
-var ANGLE_STEP = 3.0;
+var ANGLE_STEP = 2.0;
 var g_xAngle = 15.0;
 var g_yAngle = 0.0
 
@@ -83,6 +86,7 @@ function main() {
     var u_LightColor = gl.getUniformLocation(gl.program, 'u_LightColor');
     var u_AmbientLight = gl.getUniformLocation(gl.program, 'u_AmbientLight');
     var u_LightDirection = gl.getUniformLocation(gl.program, 'u_LightDirection');
+    var u_LightPosition = gl.getUniformLocation(gl.program, 'u_LightPosition');
 
     var u_isLighting = gl.getUniformLocation(gl.program, 'u_isLighting');
 
@@ -93,9 +97,8 @@ function main() {
 
     gl.uniform3f(u_LightColor, 1.0, 1.0, 1.0);
     gl.uniform3f(u_AmbientLight, 0.3, 0.3, 0.3);
-    var lightDirection = new Vector3([0.5, 3.0, 4.0]);
-    lightDirection.normalize();
-    gl.uniform3fv(u_LightDirection, lightDirection.elements);
+    gl.uniform3fv(u_LightDirection, [0.5/7.5, 3.0/7.5, 4.0/7.5]);
+    gl.uniform3fv(u_LightPosition, [5.0/7.0, 1.0/7.0, 2.0/7.0]);
 
     viewMatrix.setLookAt(a1_View, a2_View, a3_View, b1_View, b2_View, b3_View, c1_View, c2_View, c3_View);
     projMatrix.setPerspective(45, canvas.width/canvas.height, 1, 100);
