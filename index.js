@@ -8,6 +8,8 @@ var VSHADER_SOURCE =
   'uniform mat4 u_ProjMatrix;\n' +
   'uniform vec3 u_LightColor;\n' +     
   'uniform vec3 u_AmbientLight;\n' +
+  'uniform vec3 u_Sampler;\n' +
+  'uniform vec3 u_UseTextures;\n' +
   'uniform vec3 u_LightDirection;\n' + 
   'uniform vec3 u_LightPosition;\n' +
   'varying vec4 v_Color;\n' +
@@ -62,6 +64,12 @@ var g_yAngle = 0.0
 
 function main() {
     var canvas = document.getElementById('webgl');
+
+    // var width = canvas.width;
+    // var height = canvas;
+
+    // canvas.width = nextPowerof2(width);
+    // canvas.height = nextPowerof2(height);
   
     var gl = getWebGLContext(canvas);
     if (!gl) {
@@ -87,6 +95,8 @@ function main() {
     var u_AmbientLight = gl.getUniformLocation(gl.program, 'u_AmbientLight');
     var u_LightDirection = gl.getUniformLocation(gl.program, 'u_LightDirection');
     var u_LightPosition = gl.getUniformLocation(gl.program, 'u_LightPosition');
+    var u_Sampler = gl.getUniformLocation(gl.program, 'u_Sampler');
+    var u_UseTextures = gl.getUniformLocation(gl.program, 'u_UseTextures');
 
     var u_isLighting = gl.getUniformLocation(gl.program, 'u_isLighting');
 
@@ -109,8 +119,23 @@ function main() {
         keydown(ev, gl, u_ModelMatrix, u_NormalMatrix, u_isLighting, u_ViewMatrix);
     };
 
+    // var loaded = false;
+    // var texture;
+    // var img = new Image();
+
+    // // img.onload = function() {
+    // //   texture = gl.createTexture();
+    // //   drawTexture(gl, 5, texture, u_Sampler, u_UseTextures);
+    // //   loaded = true;
+    // // };
+    // // img.src = "wood.png";
+
     draw(gl, u_ModelMatrix, u_NormalMatrix, u_isLighting);
 };
+
+function nextPowerof2(value) {
+  return Math.pow(2, Math.ceil(Math.log(value) / Math.log(2)));
+}
 
 function keydown(ev, gl, u_ModelMatrix, u_NormalMatrix, u_isLighting, u_ViewMatrix) {
     switch (ev.keyCode) {
@@ -313,6 +338,25 @@ function drawbox(gl, u_ModelMatrix, u_NormalMatrix, n) {
     gl.drawElements(gl.TRIANGLES, n, gl.UNSIGNED_BYTE, 0);
 
   modelMatrix = popMatrix();
+}
+
+function drawTexture(gl, n, texture, u_Sampler, u_UseTextures){
+  gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, 1);
+  gl.activeTexture(gl.TEXTURE0);
+  gl.bindTexture(gl.TEXTURE_2D, texture);
+
+  try {
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RBG, gl.RBG, gl.UNSIGNED_BYTE, texture.image);
+  } catch(e) {
+    console.log(e);
+  }
+
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+
+  gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+  gl.uniform1i(u_Sampler, 0);
+  gl.uniform1i(u_UseTextures, true);
+  gl.drawElements(gl.TRIANGLES, n, gl.UNSIGNED_BYTE, 0);
 }
 
 function buildChair(gl, u_ModelMatrix, u_NormalMatrix, u_isLighting, n, translate_x, translate_y, translate_z, face) {
