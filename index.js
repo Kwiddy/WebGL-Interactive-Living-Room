@@ -7,6 +7,7 @@ var VSHADER_SOURCE =
   'uniform mat4 u_ViewMatrix;\n' +
   'uniform mat4 u_ProjMatrix;\n' +
   'uniform vec3 u_LightColor;\n' +     
+  'uniform vec3 u_AmbientLight;\n' +
   'uniform vec3 u_LightDirection;\n' + 
   'varying vec4 v_Color;\n' +
   'uniform bool u_isLighting;\n' +
@@ -17,7 +18,9 @@ var VSHADER_SOURCE =
   '     vec3 normal = normalize((u_NormalMatrix * a_Normal).xyz);\n' +
   '     float nDotL = max(dot(normal, u_LightDirection), 0.0);\n' +
   '     vec3 diffuse = u_LightColor * a_Color.rgb * nDotL;\n' +
-  '     v_Color = vec4(diffuse, a_Color.a);\n' +  '  }\n' +
+  '     vec3 ambient = u_AmbientLight * a_Color.rgb;\n' +
+  '     v_Color = vec4(diffuse + ambient, a_Color.a);\n' +  
+  '  }\n' +
   '  else\n' +
   '  {\n' +
   '     v_Color = a_Color;\n' +
@@ -78,16 +81,18 @@ function main() {
     var u_NormalMatrix = gl.getUniformLocation(gl.program, 'u_NormalMatrix');
     var u_ProjMatrix = gl.getUniformLocation(gl.program, 'u_ProjMatrix');
     var u_LightColor = gl.getUniformLocation(gl.program, 'u_LightColor');
+    var u_AmbientLight = gl.getUniformLocation(gl.program, 'u_AmbientLight');
     var u_LightDirection = gl.getUniformLocation(gl.program, 'u_LightDirection');
 
     var u_isLighting = gl.getUniformLocation(gl.program, 'u_isLighting');
 
-    if (!u_ModelMatrix || !u_ViewMatrix || !u_NormalMatrix || !u_ProjMatrix || !u_LightColor || !u_LightDirection || !u_isLighting ) { 
+    if (!u_ModelMatrix || !u_ViewMatrix || !u_NormalMatrix || !u_ProjMatrix || !u_LightColor || !u_AmbientLight || !u_LightDirection || !u_isLighting ) { 
       console.log('Failed to Get the storage locations of u_ModelMatrix, u_ViewMatrix, and/or u_ProjMatrix');
       return;
     }
 
     gl.uniform3f(u_LightColor, 1.0, 1.0, 1.0);
+    gl.uniform3f(u_AmbientLight, 0.3, 0.3, 0.3);
     var lightDirection = new Vector3([0.5, 3.0, 4.0]);
     lightDirection.normalize();
     gl.uniform3fv(u_LightDirection, lightDirection.elements);
@@ -410,6 +415,6 @@ function buildScene(gl, u_ModelMatrix, u_NormalMatrix, u_isLighting) {
   buildChair(gl, u_ModelMatrix, u_NormalMatrix, u_isLighting, initVertexBuffers(gl, 0.55, 0.35, 0.1), 3, 0, 0, "far");
   buildChair(gl, u_ModelMatrix, u_NormalMatrix, u_isLighting, initVertexBuffers(gl, 0.55, 0.35, 0.1), 0, 0, 7.5, "near");
   buildChair(gl, u_ModelMatrix, u_NormalMatrix, u_isLighting, initVertexBuffers(gl, 0.55, 0.35, 0.1), 3, 0, 7.5, "near");
-  buildTable(gl, u_ModelMatrix, u_NormalMatrix, u_isLighting, initVertexBuffers(gl, 0, 0, 0), 1.5, 1.25, 3.75);
+  buildTable(gl, u_ModelMatrix, u_NormalMatrix, u_isLighting, initVertexBuffers(gl, 77/117, 40/117, 0.3), 1.5, 1.25, 3.75);
   buildFloor(gl, u_ModelMatrix, u_NormalMatrix, u_isLighting, initVertexBuffers(gl, 1, 1, 1));
 }
