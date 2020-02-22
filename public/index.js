@@ -1,18 +1,20 @@
 var VSHADER_SOURCE =
   'attribute vec4 a_Position;\n' +
   'attribute vec4 a_Color;\n' +
-  'attribute vec4 a_Normal;\n' +        
+  'attribute vec4 a_Normal;\n' +
+  'attribute vec2 a_TexCoord;\n' +        
   'uniform mat4 u_ModelMatrix;\n' +
   'uniform mat4 u_NormalMatrix;\n' +
   'uniform mat4 u_ViewMatrix;\n' +
   'uniform mat4 u_ProjMatrix;\n' +
   'uniform vec3 u_LightColor;\n' +     
   'uniform vec3 u_AmbientLight;\n' +
-  'uniform vec3 u_Sampler;\n' +
+  //'uniform vec3 u_Sampler;\n' +
   'uniform vec3 u_UseTextures;\n' +
   'uniform vec3 u_LightDirection;\n' + 
   'uniform vec3 u_LightPosition;\n' +
   'varying vec4 v_Color;\n' +
+  'varying vec2 v_TexCoord;\n' +
   'uniform bool u_isLighting;\n' +
   'void main() {\n' +
   '  gl_Position = u_ProjMatrix * u_ViewMatrix * u_ModelMatrix * a_Position;\n' +
@@ -36,9 +38,11 @@ var VSHADER_SOURCE =
   '#ifdef GL_ES\n' +
   'precision mediump float;\n' +
   '#endif\n' +
+  'uniform sampler2D u_Sampler;\n' +
   'varying vec4 v_Color;\n' +
+  'varying vec2 v_TexCoord;\n' +
   'void main() {\n' +
-  '  gl_FragColor = v_Color;\n' +
+  '  gl_FragColor = texture2D(u_Sampler, v_TexCoord);\n' +
   '}\n';
 
 var modelMatrix = new Matrix4();
@@ -68,6 +72,8 @@ function main() {
     var width = canvas.width;
     var height = canvas.height;
 
+    var n = initVertexBuffers(gl);
+
     canvas.width = nextPowerof2(width);
     canvas.height = nextPowerof2(height);
   
@@ -78,8 +84,12 @@ function main() {
     }
   
     if (!initShaders(gl, VSHADER_SOURCE, FSHADER_SOURCE)) {
-      console.log('Failed to intialize shaders.');
+      console.log('Failed to initialize shaders.');
       return;
+    }
+
+    if (!initTextures(gl, n)) {
+      console.log("Failed to initialize textures.")
     }
 
     gl.clearColor(0.0, 0.0, 0.0, 0.8);
@@ -125,7 +135,8 @@ function main() {
 
     img.onload = function() {
       texture = gl.createTexture();
-      drawTexture(gl, 5, img, u_Sampler, u_UseTextures, texture);
+      var u_Sampler = gl.getUniformLocation(gl.program, 'u_Sampler');
+      loadTexture(gl, n, img, u_Sampler, u_UseTextures, texture);
       loaded = true;
     };
     img.src = "wood.png";
@@ -208,6 +219,15 @@ function initVertexBuffers(gl, rVal, gVal, bVal) {
       0.0, 0.0,-1.0,   0.0, 0.0,-1.0,   0.0, 0.0,-1.0,   0.0, 0.0,-1.0   
     ]);
    
+    var vertexCoords = new Float32Array([
+      0.5, 0.5, 0.5,  -0.5, 0.5, 0.5,  0,0, 1,   1,0, 1, 
+      0.5, 0.5, 0.5,   0.5,-0.5, 0.5,   1,0,0,   1, 1,0, 
+      0.5, 0.5, 0.5,   0.5, 0.5,-0.5,  0, 1,0,  0, 1, 1, 
+      -0.5, 0.5, 0.5,  -0.5, 0.5,-0.5,  0,0,0,  0,0, 1, 
+      -0.5,-0.5,-0.5,   0.5,-0.5,-0.5,   1,0, 1,  0,0, 1, 
+      0.5,-0.5,-0.5,  -0.5,-0.5,-0.5,  0, 1,0,   1, 1,0
+    ]);
+
     var indices = new Uint8Array([
       0, 1, 2,   0, 2, 3,    
       4, 5, 6,   4, 6, 7,    
@@ -216,6 +236,7 @@ function initVertexBuffers(gl, rVal, gVal, bVal) {
       16,17,18,  16,18,19,    
       20,21,22,  20,22,23     
     ]);
+    var n = 6;
 
     if (!initArrayBuffer(gl, 'a_Position', vertices, 3, gl.FLOAT)) return -1;
     if (!initArrayBuffer(gl, 'a_Color', colors, 3, gl.FLOAT)) return -1;
@@ -227,10 +248,25 @@ function initVertexBuffers(gl, rVal, gVal, bVal) {
         return false;
     }
 
-    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indexBuffer);
-    gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, indices, gl.STATIC_DRAW);
+    // gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indexBuffer);
+    // gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, indices, gl.STATIC_DRAW);
 
-    return indices.length;
+    var vertexCoordBuffer = gl.createBuffer();
+
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, vertexCoordBuffer);
+    gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, vertexCoords, gl.STATIC_DRAW);
+
+    var FSIZE = vertexCoords.BYTES_PER_ELEMENT;
+
+    gl.vertexAttribPointer(a_Position, 2, gl.FLOAT, false, FSIZE*4, 0);
+    gl.enableVertexAttribArray(a_Position);
+
+    var a_TexCoord = gl.getAttribLocation(gl.program, 'a_TexCoord');
+
+    gl.vertexAttribPointer(a_TexCoord, 2, gl.FLOAT, false, FSIZE*4, FSIZE*2);
+    gl.enableVertexAttribArray(a_TexCoord);
+
+    return n;
 }
 
 function initArrayBuffer (gl, attribute, data, num, type) {
@@ -344,7 +380,7 @@ function drawbox(gl, u_ModelMatrix, u_NormalMatrix, n) {
   modelMatrix = popMatrix();
 }
 
-function drawTexture(gl, n, image, u_Sampler, u_UseTextures, texture){
+function loadTexture(gl, n, image, u_Sampler, u_UseTextures, texture){
   gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, 1);
   gl.activeTexture(gl.TEXTURE0);
   gl.bindTexture(gl.TEXTURE_2D, texture);
