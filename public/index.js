@@ -279,15 +279,15 @@ function initVertexBuffers(gl, rVal, gVal, bVal) {
 
     var FSIZE = verticesTexCoords.BYTES_PER_ELEMENT;
 
-    gl.vertexAttribPointer(a_Position, 24, gl.FLOAT, false, FSIZE * 4, 0);
+    //Works if you replace 3 with 24 for some reason
+    gl.vertexAttribPointer(a_Position, 24, gl.FLOAT, false, 0, 0);
     gl.enableVertexAttribArray(a_Position);
 
     var a_TexCoord = gl.getAttribLocation(gl.program, 'a_TexCoord');
 
-    gl.vertexAttribPointer(a_TexCoord, 3, gl.FLOAT, false, FSIZE * 4, FSIZE * 2);
+    gl.vertexAttribPointer(a_TexCoord, 3, gl.FLOAT, false, 0, 0);
     gl.enableVertexAttribArray(a_TexCoord);
 
-    //return indices.length;
     return n;
 }
 
@@ -392,10 +392,7 @@ function draw(gl, u_ModelMatrix, u_NormalMatrix, u_isLighting) {
       if(loaded) {
         drawTexture(gl, n, img, u_Sampler, u_UseTextures, texture);
         buildScene(gl, u_ModelMatrix, u_NormalMatrix, u_isLighting);
-      } else {
-        console.log("updated");
-        //requestAnimationFrame(update);
-    }
+      } 
   }
 
   } catch {
