@@ -65,9 +65,32 @@ var c3_View = 0;
 
 var ANGLE_STEP = 2.0;
 var g_xAngle = 15.0;
-var g_yAngle = 0.0
+var g_yAngle = 0.0;
+
+var canvas;
+var gl;
+
+var u_ModelMatrix;
+var u_ViewMatrix;
+var u_NormalMatrix;
+var u_ProjMatrix;
+var u_LightColor;
+var u_AmbientLight;
+var u_LightDirection;
+var u_LightPosition;
+var u_Sampler;
+var u_UseTextures;
+
+var u_isLighting;
+
+var loaded;
+var texture;
+var img;
+
+var a_Position;
 
 function main() {
+
     var canvas = document.getElementById('webgl');
 
     var width = canvas.width;
@@ -75,8 +98,9 @@ function main() {
 
     canvas.width = nextPowerof2(width);
     canvas.height = nextPowerof2(height);
+
+    gl = getWebGLContext(canvas);
   
-    var gl = getWebGLContext(canvas);
     if (!gl) {
       console.log('Failed to get the rendering context for WebGL');
       return;
@@ -92,18 +116,17 @@ function main() {
 
     gl.enable(gl.DEPTH_TEST);
 
-    var u_ModelMatrix = gl.getUniformLocation(gl.program, 'u_ModelMatrix');
-    var u_ViewMatrix = gl.getUniformLocation(gl.program, 'u_ViewMatrix');
-    var u_NormalMatrix = gl.getUniformLocation(gl.program, 'u_NormalMatrix');
-    var u_ProjMatrix = gl.getUniformLocation(gl.program, 'u_ProjMatrix');
-    var u_LightColor = gl.getUniformLocation(gl.program, 'u_LightColor');
-    var u_AmbientLight = gl.getUniformLocation(gl.program, 'u_AmbientLight');
-    var u_LightDirection = gl.getUniformLocation(gl.program, 'u_LightDirection');
-    var u_LightPosition = gl.getUniformLocation(gl.program, 'u_LightPosition');
-    var u_Sampler = gl.getUniformLocation(gl.program, 'u_Sampler');
-    var u_UseTextures = gl.getUniformLocation(gl.program, 'u_UseTextures');
-
-    var u_isLighting = gl.getUniformLocation(gl.program, 'u_isLighting');
+    u_ModelMatrix = gl.getUniformLocation(gl.program, 'u_ModelMatrix');
+    u_ViewMatrix = gl.getUniformLocation(gl.program, 'u_ViewMatrix');
+    u_NormalMatrix = gl.getUniformLocation(gl.program, 'u_NormalMatrix');
+    u_ProjMatrix = gl.getUniformLocation(gl.program, 'u_ProjMatrix');
+    u_LightColor = gl.getUniformLocation(gl.program, 'u_LightColor');
+    u_AmbientLight = gl.getUniformLocation(gl.program, 'u_AmbientLight');
+    u_LightDirection = gl.getUniformLocation(gl.program, 'u_LightDirection');
+    u_LightPosition = gl.getUniformLocation(gl.program, 'u_LightPosition');
+    u_Sampler = gl.getUniformLocation(gl.program, 'u_Sampler');
+    u_UseTextures = gl.getUniformLocation(gl.program, 'u_UseTextures');
+    u_isLighting = gl.getUniformLocation(gl.program, 'u_isLighting');
 
     if (!u_ModelMatrix || !u_ViewMatrix || !u_NormalMatrix || !u_ProjMatrix || !u_LightColor || !u_AmbientLight || !u_LightDirection || !u_isLighting ) { 
       console.log('Failed to Get the storage locations of u_ModelMatrix, u_ViewMatrix, and/or u_ProjMatrix');
@@ -124,19 +147,25 @@ function main() {
         keydown(ev, gl, u_ModelMatrix, u_NormalMatrix, u_isLighting, u_ViewMatrix);
     };
 
-    var loaded = false;
-    var texture;
-    var img = new Image();
+    var n = initVertexBuffers(gl, 0.55, 0.35, 0.1);
+
+    loaded = false;
+    img = new Image();
 
     img.onload = function() {
       texture = gl.createTexture();
-      drawTexture(gl, 5, img, u_Sampler, u_UseTextures, texture);
       loaded = true;
     };
     img.src = "wood.png";
+    //img.src = "carpet.jpg";
 
-    draw(gl, u_ModelMatrix, u_NormalMatrix, u_isLighting);
+    requestAnimationFrame(update);
 };
+
+function update() {
+  draw(gl, u_ModelMatrix, u_NormalMatrix, u_isLighting);
+  requestAnimationFrame(update);
+}
 
 function nextPowerof2(value) {
   return Math.pow(2, Math.ceil(Math.log(value) / Math.log(2)));
@@ -182,7 +211,6 @@ function keydown(ev, gl, u_ModelMatrix, u_NormalMatrix, u_isLighting, u_ViewMatr
     }
     viewMatrix.setLookAt(a1_View, a2_View, a3_View, b1_View, b2_View, b3_View, c1_View, c2_View, c3_View);
     gl.uniformMatrix4fv(u_ViewMatrix, false, viewMatrix.elements);
-    draw(gl, u_ModelMatrix, u_NormalMatrix, u_isLighting);
 }
 
 function initVertexBuffers(gl, rVal, gVal, bVal) {
@@ -222,6 +250,18 @@ function initVertexBuffers(gl, rVal, gVal, bVal) {
       20,21,22,  20,22,23     
     ]);
 
+    var verticesTexCoords = new Float32Array([   
+      0.5, 0.5, 0.5,  -0.5, 0.5, 0.5,  -0.5,-0.5, 0.5,   0.5,-0.5, 0.5,   1.0, 1.0, 1.0,    0.0, 1.0, 1.0,    0.0, 0.0, 1.0,    1.0, 0.0, 1.0,  
+      0.5, 0.5, 0.5,   0.5,-0.5, 0.5,   0.5,-0.5,-0.5,   0.5, 0.5,-0.5,   1.0, 1.0, 1.0,    1.0, 0.0, 1.0,    1.0, 0.0, 0.0,    1.0, 1.0, 0.0, 
+      0.5, 0.5, 0.5,   0.5, 0.5,-0.5,  -0.5, 0.5,-0.5,  -0.5, 0.5, 0.5,   1.0, 1.0, 1.0,    1.0, 1.0, 0.0,    0.0, 1.0, 0.0,    0.0, 1.0, 1.0, 
+      -0.5, 0.5, 0.5,  -0.5, 0.5,-0.5,  -0.5,-0.5,-0.5,  -0.5,-0.5, 0.5,  0.0, 1.0, 1.0,    0.0, 1.0, 0.0,    0.0, 0.0, 0.0,    0.0, 0.0, 1.0,
+      -0.5,-0.5,-0.5,   0.5,-0.5,-0.5,   0.5,-0.5, 0.5,  -0.5,-0.5, 0.5,  0.0, 0.0, 0.0,    1.0, 0.0, 0.0,    1.0, 0.0, 1.0,    0.0, 0.0, 1.0,
+      0.5,-0.5,-0.5,  -0.5,-0.5,-0.5,  -0.5, 0.5,-0.5,   0.5, 0.5,-0.5,   1.0, 0.0, 0.0,    0.0, 0.0, 0.0,    0.0, 1.0, 0.0,    1.0, 1.0, 0.0
+    ]);
+    //var n=6;
+
+    var vertexTexCoordBuffer = gl.createBuffer();
+
     if (!initArrayBuffer(gl, 'a_Position', vertices, 3, gl.FLOAT)) return -1;
     if (!initArrayBuffer(gl, 'a_Color', colors, 3, gl.FLOAT)) return -1;
     if (!initArrayBuffer(gl, 'a_Normal', normals, 3, gl.FLOAT)) return -1;
@@ -234,8 +274,21 @@ function initVertexBuffers(gl, rVal, gVal, bVal) {
 
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indexBuffer);
     gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, indices, gl.STATIC_DRAW);
+    gl.bindBuffer(gl.ARRAY_BUFFER, vertexTexCoordBuffer);
+    gl.bufferData(gl.ARRAY_BUFFER, verticesTexCoords, gl.STATIC_DRAW);
+
+    var FSIZE = verticesTexCoords.BYTES_PER_ELEMENT;
+
+    gl.vertexAttribPointer(a_Position, 2, gl.FLOAT, false, FSIZE * 4, 0);
+    gl.enableVertexAttribArray(a_Position);
+
+    var a_TexCoord = gl.getAttribLocation(gl.program, 'a_TexCoord');
+
+    gl.vertexAttribPointer(a_TexCoord, 2, gl.FLOAT, false, FSIZE * 4, FSIZE * 2);
+    gl.enableVertexAttribArray(a_TexCoord);
 
     return indices.length;
+    //return n;
 }
 
 function initArrayBuffer (gl, attribute, data, num, type) {
@@ -284,7 +337,7 @@ function initAxesVertexBuffers(gl) {
     gl.bufferData(gl.ARRAY_BUFFER, verticesColors, gl.STATIC_DRAW);
   
     var FSIZE = verticesColors.BYTES_PER_ELEMENT;
-    var a_Position = gl.getAttribLocation(gl.program, 'a_Position');
+    a_Position = gl.getAttribLocation(gl.program, 'a_Position');
     if (a_Position < 0) {
       console.log('Failed to get the storage location of a_Position');
       return -1;
@@ -332,7 +385,23 @@ function draw(gl, u_ModelMatrix, u_NormalMatrix, u_isLighting) {
   modelMatrix.rotate(g_yAngle, 0, 1, 0); 
   modelMatrix.rotate(g_xAngle, 1, 0, 0);
 
-  buildScene(gl, u_ModelMatrix, u_NormalMatrix, u_isLighting);   
+  try {
+    render(loaded);
+
+    function render(loaded) {
+      if(loaded) {
+        drawTexture(gl, n, img, u_Sampler, u_UseTextures, texture);
+        buildScene(gl, u_ModelMatrix, u_NormalMatrix, u_isLighting);
+      } else {
+        console.log("updated");
+        //requestAnimationFrame(update);
+    }
+  }
+
+  } catch {
+    console.log('Failed to initialize textures');
+    return;
+  }    
 }
 
 function drawbox(gl, u_ModelMatrix, u_NormalMatrix, n) {
@@ -369,10 +438,10 @@ function drawTexture(gl, n, image, u_Sampler, u_UseTextures, texture){
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
   }
 
-  gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+ // gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
   gl.uniform1i(u_Sampler, 0);
   gl.uniform1i(u_UseTextures, true);
-  gl.drawElements(gl.TRIANGLES, n, gl.UNSIGNED_BYTE, 0);
+  //gl.drawElements(gl.TRIANGLES, n, gl.UNSIGNED_BYTE, 0);
 }
 
 function buildChair(gl, u_ModelMatrix, u_NormalMatrix, u_isLighting, n, translate_x, translate_y, translate_z, face) {
