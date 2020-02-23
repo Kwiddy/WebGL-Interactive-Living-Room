@@ -147,7 +147,7 @@ function main() {
         keydown(ev, gl, u_ModelMatrix, u_NormalMatrix, u_isLighting, u_ViewMatrix);
     };
 
-    var n = initVertexBuffers(gl, 0.55, 0.35, 0.1);
+    //var n = initVertexBuffers(gl, 0.55, 0.35, 0.1);
 
     loaded = false;
     img = new Image();
@@ -258,7 +258,7 @@ function initVertexBuffers(gl, rVal, gVal, bVal) {
       -0.5,-0.5,-0.5,   0.5,-0.5,-0.5,   0.5,-0.5, 0.5,  -0.5,-0.5, 0.5,  0.0, 0.0, 0.0,    1.0, 0.0, 0.0,    1.0, 0.0, 1.0,    0.0, 0.0, 1.0,
       0.5,-0.5,-0.5,  -0.5,-0.5,-0.5,  -0.5, 0.5,-0.5,   0.5, 0.5,-0.5,   1.0, 0.0, 0.0,    0.0, 0.0, 0.0,    0.0, 1.0, 0.0,    1.0, 1.0, 0.0
     ]);
-    //var n=6;
+    var n=24;
 
     var vertexTexCoordBuffer = gl.createBuffer();
 
@@ -279,16 +279,16 @@ function initVertexBuffers(gl, rVal, gVal, bVal) {
 
     var FSIZE = verticesTexCoords.BYTES_PER_ELEMENT;
 
-    gl.vertexAttribPointer(a_Position, 2, gl.FLOAT, false, FSIZE * 4, 0);
+    gl.vertexAttribPointer(a_Position, 24, gl.FLOAT, false, FSIZE * 4, 0);
     gl.enableVertexAttribArray(a_Position);
 
     var a_TexCoord = gl.getAttribLocation(gl.program, 'a_TexCoord');
 
-    gl.vertexAttribPointer(a_TexCoord, 2, gl.FLOAT, false, FSIZE * 4, FSIZE * 2);
+    gl.vertexAttribPointer(a_TexCoord, 3, gl.FLOAT, false, FSIZE * 4, FSIZE * 2);
     gl.enableVertexAttribArray(a_TexCoord);
 
-    return indices.length;
-    //return n;
+    //return indices.length;
+    return n;
 }
 
 function initArrayBuffer (gl, attribute, data, num, type) {
