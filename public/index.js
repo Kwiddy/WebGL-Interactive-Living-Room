@@ -250,17 +250,22 @@ function initVertexBuffers(gl, rVal, gVal, bVal) {
       20,21,22,  20,22,23     
     ]);
 
+    //Last two lines aren't loading
     var verticesTexCoords = new Float32Array([   
       0.5, 0.5, 0.5,  -0.5, 0.5, 0.5,  -0.5,-0.5, 0.5,   0.5,-0.5, 0.5,   
       0.5, 0.5, 0.5,   0.5,-0.5, 0.5,   0.5,-0.5,-0.5,   0.5, 0.5,-0.5,   
       0.5, 0.5, 0.5,   0.5, 0.5,-0.5,  -0.5, 0.5,-0.5,  -0.5, 0.5, 0.5,   
-      -0.5, 0.5, 0.5,  -0.5, 0.5,-0.5,  -0.5,-0.5,-0.5,  -0.5,-0.5, 0.5,  
+      -0.5, 0.5, 0.5,  -0.5, 0.5,-0.5,  -0.5,-0.5,-0.5,  -0.5,-0.5, 0.5, //remember to add a comma back in here  
       -0.5,-0.5,-0.5,   0.5,-0.5,-0.5,   0.5,-0.5, 0.5,  -0.5,-0.5, 0.5,  
       0.5,-0.5,-0.5,  -0.5,-0.5,-0.5,  -0.5, 0.5,-0.5,   0.5, 0.5,-0.5
     ]);
-    var n=24;
+    var n=36; //Does this need to be changed?
 
     var vertexTexCoordBuffer = gl.createBuffer();
+    if (!vertexTexCoordBuffer) {
+      console.log('Failed to create the buffer object');
+      return false;
+  }
 
     if (!initArrayBuffer(gl, 'a_Position', vertices, 3, gl.FLOAT)) return -1;
     if (!initArrayBuffer(gl, 'a_Color', colors, 3, gl.FLOAT)) return -1;
@@ -279,7 +284,6 @@ function initVertexBuffers(gl, rVal, gVal, bVal) {
 
     var FSIZE = verticesTexCoords.BYTES_PER_ELEMENT;
 
-    //Works if you replace 3 with 24 for some reason
     gl.vertexAttribPointer(a_Position, 3, gl.FLOAT, false, 0, 0);
     gl.enableVertexAttribArray(a_Position);
 
