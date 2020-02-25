@@ -85,7 +85,7 @@ var u_isLighting;
 
 var loaded;
 var texture;
-var woodimg;
+var floorplanksTEX;
 
 var a_Position;
 
@@ -150,20 +150,25 @@ function main() {
     //var n = initVertexBuffers(gl, 0.55, 0.35, 0.1);
 
     loaded = false;
-    woodimg = new Image();
+    floorplanksTEX = new Image();
 
-    woodimg.onload = function() {
+    floorplanksTEX.onload = function() {
       texture = gl.createTexture();
       loaded = true;
     };
-    // woodimg.src = "wood.png";
-    //woodimg.src = "carpet.jpg";
-    //woodimg.src = "squarewood.jpg"
-    // woodimg.src = "originalsquarewood.png";
-    // woodimg.src = "carpet2_256x256.jpg";
-    // woodimg.src = "wood3_256x256.jpg";
-    // woodimg.src = "verticalplanks_256x256.jpg";
-    woodimg.src = "verticalplanks2_256x256.jpg";
+    // floorplanksTEX.src = "wood.png";
+    //floorplanksTEX.src = "carpet.jpg";
+    //floorplanksTEX.src = "squarewood.jpg"
+    floorplanksTEX.src = "originalsquarewood.png";
+    // floorplanksTEX.src = "carpet2_256x256.jpg";
+    // floorplanksTEX.src = "wood3_256x256.jpg";
+    // floorplanksTEX.src = "verticalplanks_256x256.jpg";
+    //floorplanksTEX.src = "verticalplanks2_256x256.jpg";
+    // floorplanksTEX.src = "darkwoodplanks_256x256.jpg";
+    // floorplanksTEX.src = "woodplank3_256x256.jpg";
+    // floorplanksTEX.src = "darkwoodplank2_256x256.jpg";
+    // floorplanksTEX.src = "rustywoodplanks_256x256.jpg";
+    // floorplanksTEX.src = "rustyplank2_256x256.jpg";   
 
     requestAnimationFrame(update);
 };
@@ -407,7 +412,7 @@ function draw(gl, u_ModelMatrix, u_NormalMatrix, u_isLighting) {
 
     function render(loaded) {
       if(loaded) {
-        drawTexture(gl, n, woodimg, u_Sampler, u_UseTextures, texture);
+        drawTexture(gl, n, floorplanksTEX, u_Sampler, u_UseTextures, texture);
         buildScene(gl, u_ModelMatrix, u_NormalMatrix, u_isLighting);
       } 
   }
@@ -445,24 +450,20 @@ function drawTexture(gl, n, image, u_Sampler, u_UseTextures, texture){
   }
 
   if(isPowerof2(image.width) && isPowerof2(image.height)) {
-    console.log("powerof2");
     gl.generateMipmap(gl.TEXTURE_2D);
   } else {
-    console.log("!powerof2");
-    console.log("height: " + image.height)
-    console.log("width: " + image.width)
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
   }
 
- // gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+  gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
   gl.uniform1i(u_Sampler, 0);
   gl.uniform1i(u_UseTextures, true);
   //gl.drawElements(gl.TRIANGLES, n, gl.UNSIGNED_BYTE, 0);
 }
 
-function buildChair(gl, u_ModelMatrix, u_NormalMatrix, u_isLighting, n, translate_x, translate_y, translate_z, face) {
+function buildChair(gl, u_ModelMatrix, u_NormalMatrix, n, translate_x, translate_y, translate_z, face) {
   pushMatrix(modelMatrix);
   modelMatrix.translate(translate_x, translate_y, translate_z);
   modelMatrix.scale(2.0, 0.5, 2.0); 
@@ -508,7 +509,7 @@ function buildChair(gl, u_ModelMatrix, u_NormalMatrix, u_isLighting, n, translat
   modelMatrix = popMatrix();
 }
 
-function buildFloor(gl, u_ModelMatrix, u_NormalMatrix, u_isLighting, n) {
+function buildFloor(gl, u_ModelMatrix, u_NormalMatrix, n) {
   pushMatrix(modelMatrix);
   modelMatrix.translate(0, -2.04, 0);
   modelMatrix.scale(25.0, 0.1, 25.0); 
@@ -516,7 +517,7 @@ function buildFloor(gl, u_ModelMatrix, u_NormalMatrix, u_isLighting, n) {
   modelMatrix = popMatrix();
 }
 
-function buildTable(gl, u_ModelMatrix, u_NormalMatrix, u_isLighting, n, translate_x, translate_y, translate_z) {
+function buildTable(gl, u_ModelMatrix, u_NormalMatrix, n, translate_x, translate_y, translate_z) {
   pushMatrix(modelMatrix);
   modelMatrix.translate(translate_x, translate_y, translate_z);
   modelMatrix.scale(6.5, 0.5, 5.0); 
@@ -549,10 +550,10 @@ function buildTable(gl, u_ModelMatrix, u_NormalMatrix, u_isLighting, n, translat
 }
 
 function buildScene(gl, u_ModelMatrix, u_NormalMatrix, u_isLighting) {
-  buildChair(gl, u_ModelMatrix, u_NormalMatrix, u_isLighting, initVertexBuffers(gl, 0.55, 0.35, 0.1), 1, 0, 10, "far");
-  buildChair(gl, u_ModelMatrix, u_NormalMatrix, u_isLighting, initVertexBuffers(gl, 0.55, 0.35, 0.1), 5, 0, 10, "far");
-  buildChair(gl, u_ModelMatrix, u_NormalMatrix, u_isLighting, initVertexBuffers(gl, 0.55, 0.35, 0.1), 1, 0, 19, "near");
-  buildChair(gl, u_ModelMatrix, u_NormalMatrix, u_isLighting, initVertexBuffers(gl, 0.55, 0.35, 0.1), 5, 0, 19, "near");
-  buildTable(gl, u_ModelMatrix, u_NormalMatrix, u_isLighting, initVertexBuffers(gl, 77/117, 40/117, 0.3), 1, 1, 13);
-  buildFloor(gl, u_ModelMatrix, u_NormalMatrix, u_isLighting, initVertexBuffers(gl, 1, 1, 1));
+  buildChair(gl, u_ModelMatrix, u_NormalMatrix, initVertexBuffers(gl, 0.55, 0.35, 0.1), 1, 0, 10, "far");
+  buildChair(gl, u_ModelMatrix, u_NormalMatrix, initVertexBuffers(gl, 0.55, 0.35, 0.1), 5, 0, 10, "far");
+  buildChair(gl, u_ModelMatrix, u_NormalMatrix, initVertexBuffers(gl, 0.55, 0.35, 0.1), 1, 0, 19, "near");
+  buildChair(gl, u_ModelMatrix, u_NormalMatrix, initVertexBuffers(gl, 0.55, 0.35, 0.1), 5, 0, 19, "near");
+  buildTable(gl, u_ModelMatrix, u_NormalMatrix, initVertexBuffers(gl, 77/117, 40/117, 0.3), 1, 1, 13);
+  buildFloor(gl, u_ModelMatrix, u_NormalMatrix, initVertexBuffers(gl, 1, 1, 1));
 }
