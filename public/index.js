@@ -53,8 +53,8 @@ var g_normalMatrix = new Matrix4();
 
 var g_matrixStack = []; 
 
-var a1_View = 0;
-var a2_View = 0;
+var a1_View = 14;
+var a2_View = -5;
 var a3_View = 50;
 var b1_View = 0;
 var b2_View = 0;
@@ -64,7 +64,7 @@ var c2_View = 1;
 var c3_View = 0;
 
 var ANGLE_STEP = 2.0;
-var g_xAngle = 15.0;
+var g_xAngle = 10.0;
 var g_yAngle = 0.0;
 
 var canvas;
@@ -85,7 +85,7 @@ var u_isLighting;
 
 var loaded;
 var texture;
-var img;
+var woodimg;
 
 var a_Position;
 
@@ -150,14 +150,20 @@ function main() {
     //var n = initVertexBuffers(gl, 0.55, 0.35, 0.1);
 
     loaded = false;
-    img = new Image();
+    woodimg = new Image();
 
-    img.onload = function() {
+    woodimg.onload = function() {
       texture = gl.createTexture();
       loaded = true;
     };
-    img.src = "wood.png";
-    //img.src = "carpet.jpg";
+    // woodimg.src = "wood.png";
+    //woodimg.src = "carpet.jpg";
+    //woodimg.src = "squarewood.jpg"
+    // woodimg.src = "originalsquarewood.png";
+    // woodimg.src = "carpet2_256x256.jpg";
+    // woodimg.src = "wood3_256x256.jpg";
+    // woodimg.src = "verticalplanks_256x256.jpg";
+    woodimg.src = "verticalplanks2_256x256.jpg";
 
     requestAnimationFrame(update);
 };
@@ -401,7 +407,7 @@ function draw(gl, u_ModelMatrix, u_NormalMatrix, u_isLighting) {
 
     function render(loaded) {
       if(loaded) {
-        drawTexture(gl, n, img, u_Sampler, u_UseTextures, texture);
+        drawTexture(gl, n, woodimg, u_Sampler, u_UseTextures, texture);
         buildScene(gl, u_ModelMatrix, u_NormalMatrix, u_isLighting);
       } 
   }
@@ -439,8 +445,12 @@ function drawTexture(gl, n, image, u_Sampler, u_UseTextures, texture){
   }
 
   if(isPowerof2(image.width) && isPowerof2(image.height)) {
+    console.log("powerof2");
     gl.generateMipmap(gl.TEXTURE_2D);
   } else {
+    console.log("!powerof2");
+    console.log("height: " + image.height)
+    console.log("width: " + image.width)
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
