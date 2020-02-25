@@ -156,16 +156,18 @@ function main() {
       texture = gl.createTexture();
       loaded = true;
     };
+
+    floorplanksTEX.src = "originalsquarewood.png";
+
     // floorplanksTEX.src = "wood.png";
     //floorplanksTEX.src = "carpet.jpg";
     //floorplanksTEX.src = "squarewood.jpg"
-    floorplanksTEX.src = "originalsquarewood.png";
     // floorplanksTEX.src = "carpet2_256x256.jpg";
-    // floorplanksTEX.src = "wood3_256x256.jpg";
+    //  floorplanksTEX.src = "wood3_256x256.jpg";
     // floorplanksTEX.src = "verticalplanks_256x256.jpg";
-    //floorplanksTEX.src = "verticalplanks2_256x256.jpg";
+    // floorplanksTEX.src = "verticalplanks2_256x256.jpg";
     // floorplanksTEX.src = "darkwoodplanks_256x256.jpg";
-    // floorplanksTEX.src = "woodplank3_256x256.jpg";
+    //  floorplanksTEX.src = "woodplank3_256x256.jpg";
     // floorplanksTEX.src = "darkwoodplank2_256x256.jpg";
     // floorplanksTEX.src = "rustywoodplanks_256x256.jpg";
     // floorplanksTEX.src = "rustyplank2_256x256.jpg";   
@@ -635,6 +637,44 @@ function buildTv(gl, u_ModelMatrix, u_NormalMatrix, n, translate_x, translate_y,
 
 }
 
+function buildPouffe(gl, u_ModelMatrix, u_NormalMatrix, n, translate_x, translate_y, translate_z, face) {
+  pushMatrix(modelMatrix);
+  modelMatrix.translate(translate_x, translate_y-1.5, translate_z-1);  
+  modelMatrix.scale(3.0, 1.25, 3);
+  drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
+  modelMatrix = popMatrix();
+
+  pushMatrix(modelMatrix);
+  modelMatrix.translate(translate_x-0.125, translate_y-0.5, translate_z-1.125);  
+  modelMatrix.scale(3.25, 0.75, 3.25);
+  drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
+  modelMatrix = popMatrix();
+
+  pushMatrix(modelMatrix);
+  modelMatrix.translate(translate_x+2.5, translate_y-2, translate_z+1.5);  
+  modelMatrix.scale(0.5, 0.5, 0.5);
+  drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
+  modelMatrix = popMatrix();
+
+  pushMatrix(modelMatrix);
+  modelMatrix.translate(translate_x, translate_y-2, translate_z+1.5);  
+  modelMatrix.scale(0.5, 0.5, 0.5);
+  drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
+  modelMatrix = popMatrix();
+
+  pushMatrix(modelMatrix);
+  modelMatrix.translate(translate_x+2.5, translate_y-2, translate_z-1);  
+  modelMatrix.scale(0.5, 0.5, 0.5);
+  drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
+  modelMatrix = popMatrix();
+
+  pushMatrix(modelMatrix);
+  modelMatrix.translate(translate_x, translate_y-2, translate_z-1);  
+  modelMatrix.scale(0.5, 0.5, 0.5);
+  drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
+  modelMatrix = popMatrix();
+}
+
 function buildScene(gl, u_ModelMatrix, u_NormalMatrix, u_isLighting) {
   buildChair(gl, u_ModelMatrix, u_NormalMatrix, initVertexBuffers(gl, 0.55, 0.35, 0.1), 1, 0, 13, "far");
   buildChair(gl, u_ModelMatrix, u_NormalMatrix, initVertexBuffers(gl, 0.55, 0.35, 0.1), 5, 0, 13, "far");
@@ -649,6 +689,8 @@ function buildScene(gl, u_ModelMatrix, u_NormalMatrix, u_isLighting) {
   buildLamp(gl, u_ModelMatrix, u_NormalMatrix, initVertexBuffers(gl, 77/117, 40/117, 0.3), 23, 0, 22);
   
   buildTvStand(gl, u_ModelMatrix, u_NormalMatrix, initVertexBuffers(gl, 77/11, 40/117, 0.3), 21.5, 0, 8);
+
+  buildPouffe(gl, u_ModelMatrix, u_NormalMatrix, initVertexBuffers(gl, 77/11, 40/117, 0.3), 17, 0, 18);
  
   buildFloor(gl, u_ModelMatrix, u_NormalMatrix, initVertexBuffers(gl, 1, 1, 1));
 }
