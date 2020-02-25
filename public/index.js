@@ -144,7 +144,7 @@ function main() {
     gl.uniformMatrix4fv(u_ProjMatrix, false, projMatrix.elements);
 
     document.onkeydown = function(ev) {
-        keydown(ev, gl, u_ModelMatrix, u_NormalMatrix, u_isLighting, u_ViewMatrix);
+        keydown(ev, gl, u_ViewMatrix);
     };
 
     //var n = initVertexBuffers(gl, 0.55, 0.35, 0.1);
@@ -175,7 +175,7 @@ function isPowerof2(value) {
   return (value & (value - 1)) === 0;
 }
 
-function keydown(ev, gl, u_ModelMatrix, u_NormalMatrix, u_isLighting, u_ViewMatrix) {
+function keydown(ev, gl, u_ViewMatrix) {
     switch (ev.keyCode) {
         case 40: //up
             g_xAngle = (g_xAngle + ANGLE_STEP) % 360;
@@ -223,14 +223,16 @@ function initVertexBuffers(gl, rVal, gVal, bVal) {
       0.5,-0.5,-0.5,  -0.5,-0.5,-0.5,  -0.5, 0.5,-0.5,   0.5, 0.5,-0.5  
     ]);
   
-    var colors = new Float32Array([    
-      rVal, gVal, bVal,   rVal, gVal, bVal,   rVal, gVal, bVal,  rVal, gVal, bVal,     
-      rVal, gVal, bVal,   rVal, gVal, bVal,   rVal, gVal, bVal,  rVal, gVal, bVal,     
-      rVal, gVal, bVal,   rVal, gVal, bVal,   rVal, gVal, bVal,  rVal, gVal, bVal,     
-      rVal, gVal, bVal,   rVal, gVal, bVal,   rVal, gVal, bVal,  rVal, gVal, bVal,     
-      rVal, gVal, bVal,   rVal, gVal, bVal,   rVal, gVal, bVal,  rVal, gVal, bVal,     
-      rVal, gVal, bVal,   rVal, gVal, bVal,   rVal, gVal, bVal,  rVal, gVal, bVal　    
-    ]);
+    if(!loaded) {
+      var colors = new Float32Array([    
+        rVal, gVal, bVal,   rVal, gVal, bVal,   rVal, gVal, bVal,  rVal, gVal, bVal,     
+        rVal, gVal, bVal,   rVal, gVal, bVal,   rVal, gVal, bVal,  rVal, gVal, bVal,     
+        rVal, gVal, bVal,   rVal, gVal, bVal,   rVal, gVal, bVal,  rVal, gVal, bVal,     
+        rVal, gVal, bVal,   rVal, gVal, bVal,   rVal, gVal, bVal,  rVal, gVal, bVal,     
+        rVal, gVal, bVal,   rVal, gVal, bVal,   rVal, gVal, bVal,  rVal, gVal, bVal,     
+        rVal, gVal, bVal,   rVal, gVal, bVal,   rVal, gVal, bVal,  rVal, gVal, bVal　    
+      ]);
+    }
     
     var normals = new Float32Array([    
       0.0, 0.0, 1.0,   0.0, 0.0, 1.0,   0.0, 0.0, 1.0,   0.0, 0.0, 1.0,  
@@ -250,26 +252,31 @@ function initVertexBuffers(gl, rVal, gVal, bVal) {
       20,21,22,  20,22,23     
     ]);
 
-    //Last two lines aren't loading
     var verticesTexCoords = new Float32Array([   
-      0.5, 0.5, 0.5,  -0.5, 0.5, 0.5,  -0.5,-0.5, 0.5,   0.5,-0.5, 0.5,   
-      0.5, 0.5, 0.5,   0.5,-0.5, 0.5,   0.5,-0.5,-0.5,   0.5, 0.5,-0.5,   
-      0.5, 0.5, 0.5,   0.5, 0.5,-0.5,  -0.5, 0.5,-0.5,  -0.5, 0.5, 0.5,   
-      -0.5, 0.5, 0.5,  -0.5, 0.5,-0.5,  -0.5,-0.5,-0.5,  -0.5,-0.5, 0.5, //remember to add a comma back in here  
-      -0.5,-0.5,-0.5,   0.5,-0.5,-0.5,   0.5,-0.5, 0.5,  -0.5,-0.5, 0.5,  
-      0.5,-0.5,-0.5,  -0.5,-0.5,-0.5,  -0.5, 0.5,-0.5,   0.5, 0.5,-0.5
+      1, 1, 1,  0, 1, 1,  0,0, 1,   1,0, 1, 
+      1, 1, 1,   1,0, 1,   1,0,0,   1, 1,0, 
+      1, 1, 1,  1, 1,0,  0, 1,0,  0, 1,1, 
+      0,1,1,  0, 1,0,  0,0,0,  0,0,1, 
+      0,0,0,  1,0,0,   1,0, 1,  0,0,1, 
+      1,0,0,  0,0,0,  0, 1,0,   1,1,0
+      // 0.5, 0.5, 0.5,  -0.5, 0.5, 0.5,  -0.5,-0.5, 0.5,   0.5,-0.5, 0.5, 
+      // 0.5, 0.5, 0.5,   0.5,-0.5, 0.5,   0.5,-0.5,-0.5,   0.5, 0.5,-0.5, 
+      // 0.5, 0.5, 0.5,   0.5, 0.5,-0.5,  -0.5, 0.5,-0.5,  -0.5, 0.5, 0.5, 
+      // -0.5, 0.5, 0.5,  -0.5, 0.5,-0.5,  -0.5,-0.5,-0.5,  -0.5,-0.5, 0.5, 
+      // -0.5,-0.5,-0.5,   0.5,-0.5,-0.5,   0.5,-0.5, 0.5,  -0.5,-0.5, 0.5, 
+      // 0.5,-0.5,-0.5,  -0.5,-0.5,-0.5,  -0.5, 0.5,-0.5,   0.5, 0.5,-0.5 
     ]);
-    var n=36; //Does this need to be changed?
+    var n=36;
+
+    if (!initArrayBuffer(gl, 'a_Position', vertices, 3, gl.FLOAT)) return -1;
+    if(!loaded && !initArrayBuffer(gl, 'a_Color', colors, 3, gl.FLOAT)) return -1
+    if (!initArrayBuffer(gl, 'a_Normal', normals, 3, gl.FLOAT)) return -1;
 
     var vertexTexCoordBuffer = gl.createBuffer();
     if (!vertexTexCoordBuffer) {
       console.log('Failed to create the buffer object');
       return false;
-  }
-
-    if (!initArrayBuffer(gl, 'a_Position', vertices, 3, gl.FLOAT)) return -1;
-    if (!initArrayBuffer(gl, 'a_Color', colors, 3, gl.FLOAT)) return -1;
-    if (!initArrayBuffer(gl, 'a_Normal', normals, 3, gl.FLOAT)) return -1;
+    }
 
     var indexBuffer = gl.createBuffer();
     if (!indexBuffer) {
@@ -454,50 +461,38 @@ function buildChair(gl, u_ModelMatrix, u_NormalMatrix, u_isLighting, n, translat
 
   if(face == "far"){
     pushMatrix(modelMatrix);
-    modelMatrix.translate(translate_x, translate_y+1.25, translate_z-0.75);  
+    modelMatrix.translate(translate_x, translate_y+0.5, translate_z);  
     modelMatrix.scale(2.0, 2.0, 0.5);
-    drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
-    modelMatrix = popMatrix();
-  } else if(face == "left") {
-    pushMatrix(modelMatrix);
-    modelMatrix.translate(translate_x-0.75, translate_y+1.25, translate_z);  
-    modelMatrix.scale(0.5, 2.0, 2.0);
-    drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
-    modelMatrix = popMatrix();
-  } else if(face == "right") {
-    pushMatrix(modelMatrix);
-    modelMatrix.translate(translate_x+0.75, translate_y+1.25, translate_z);  
-    modelMatrix.scale(0.5, 2.0, 2.0);
     drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
     modelMatrix = popMatrix();
   } else if(face == "near") {
     pushMatrix(modelMatrix);
-    modelMatrix.translate(translate_x, translate_y+1.25, translate_z+0.75);  
+    modelMatrix.translate(translate_x, translate_y+0.5, translate_z+1.5);  
     modelMatrix.scale(2.0, 2.0, 0.5);
     drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
     modelMatrix = popMatrix();
   }
 
   pushMatrix(modelMatrix);
-  modelMatrix.translate(translate_x+0.75, translate_y-1, translate_z+0.75);  
+  modelMatrix.translate(translate_x+1.5, translate_y-2, translate_z+1.5);  
   modelMatrix.scale(0.5, 2.0, 0.5);
   drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
   modelMatrix = popMatrix();
 
   pushMatrix(modelMatrix);
-  modelMatrix.translate(translate_x-0.75, translate_y-1, translate_z+0.75);  
+  modelMatrix.translate(translate_x, translate_y-2, translate_z+1.5);  
   modelMatrix.scale(0.5, 2.0, 0.5);
   drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
   modelMatrix = popMatrix();
 
   pushMatrix(modelMatrix);
-  modelMatrix.translate(translate_x+0.75, translate_y-1, translate_z-0.75);  
+  modelMatrix.translate(translate_x+1.5, translate_y-2, translate_z);  
   modelMatrix.scale(0.5, 2.0, 0.5);
   drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
   modelMatrix = popMatrix();
 
   pushMatrix(modelMatrix);
-  modelMatrix.translate(translate_x-0.75, translate_y-1, translate_z-0.75);  
+  modelMatrix.translate(translate_x, translate_y-2, translate_z);  
   modelMatrix.scale(0.5, 2.0, 0.5);
   drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
   modelMatrix = popMatrix();
@@ -519,35 +514,35 @@ function buildTable(gl, u_ModelMatrix, u_NormalMatrix, u_isLighting, n, translat
   modelMatrix = popMatrix();
 
   pushMatrix(modelMatrix);
-  modelMatrix.translate(translate_x-2.5, translate_y-1.5, translate_z-1.5);  
+  modelMatrix.translate(translate_x+0.5, translate_y-3, translate_z+0.5);  
   modelMatrix.scale(0.5, 3.5, 0.5);
   drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
   modelMatrix = popMatrix();
 
   pushMatrix(modelMatrix);
-  modelMatrix.translate(translate_x-2.5, translate_y-1.5, translate_z+1.5);  
+  modelMatrix.translate(translate_x+0.5, translate_y-3, translate_z+4);  
   modelMatrix.scale(0.5, 3.5, 0.5);
   drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
   modelMatrix = popMatrix();
 
   pushMatrix(modelMatrix);
-  modelMatrix.translate(translate_x+2.5, translate_y-1.5, translate_z-1.5);  
+  modelMatrix.translate(translate_x+5.5, translate_y-3, translate_z+0.5);  
   modelMatrix.scale(0.5, 3.5, 0.5);
   drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
   modelMatrix = popMatrix();
 
   pushMatrix(modelMatrix);
-  modelMatrix.translate(translate_x+2.5, translate_y-1.5, translate_z+1.5);  
+  modelMatrix.translate(translate_x+5.5, translate_y-3, translate_z+4);  
   modelMatrix.scale(0.5, 3.5, 0.5);
   drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
   modelMatrix = popMatrix();
 }
 
 function buildScene(gl, u_ModelMatrix, u_NormalMatrix, u_isLighting) {
-  buildChair(gl, u_ModelMatrix, u_NormalMatrix, u_isLighting, initVertexBuffers(gl, 0.55, 0.35, 0.1), 0, 0, 0, "far");
-  buildChair(gl, u_ModelMatrix, u_NormalMatrix, u_isLighting, initVertexBuffers(gl, 0.55, 0.35, 0.1), 3, 0, 0, "far");
-  buildChair(gl, u_ModelMatrix, u_NormalMatrix, u_isLighting, initVertexBuffers(gl, 0.55, 0.35, 0.1), 0, 0, 7.5, "near");
-  buildChair(gl, u_ModelMatrix, u_NormalMatrix, u_isLighting, initVertexBuffers(gl, 0.55, 0.35, 0.1), 3, 0, 7.5, "near");
-  buildTable(gl, u_ModelMatrix, u_NormalMatrix, u_isLighting, initVertexBuffers(gl, 77/117, 40/117, 0.3), 1.5, 1.25, 3.75);
+  buildChair(gl, u_ModelMatrix, u_NormalMatrix, u_isLighting, initVertexBuffers(gl, 0.55, 0.35, 0.1), 1, 0, 10, "far");
+  buildChair(gl, u_ModelMatrix, u_NormalMatrix, u_isLighting, initVertexBuffers(gl, 0.55, 0.35, 0.1), 5, 0, 10, "far");
+  buildChair(gl, u_ModelMatrix, u_NormalMatrix, u_isLighting, initVertexBuffers(gl, 0.55, 0.35, 0.1), 1, 0, 19, "near");
+  buildChair(gl, u_ModelMatrix, u_NormalMatrix, u_isLighting, initVertexBuffers(gl, 0.55, 0.35, 0.1), 5, 0, 19, "near");
+  buildTable(gl, u_ModelMatrix, u_NormalMatrix, u_isLighting, initVertexBuffers(gl, 77/117, 40/117, 0.3), 1, 1, 13);
   buildFloor(gl, u_ModelMatrix, u_NormalMatrix, u_isLighting, initVertexBuffers(gl, 1, 1, 1));
 }
