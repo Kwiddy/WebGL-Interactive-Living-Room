@@ -53,9 +53,9 @@ var g_normalMatrix = new Matrix4();
 
 var g_matrixStack = []; 
 
-var a1_View = 14;
+var a1_View = 18;
 var a2_View = -5;
-var a3_View = 50;
+var a3_View = 60;
 var b1_View = 0;
 var b2_View = 0;
 var b3_View = -100;
@@ -64,7 +64,7 @@ var c2_View = 1;
 var c3_View = 0;
 
 var ANGLE_STEP = 2.0;
-var g_xAngle = 10.0;
+var g_xAngle = 10.0;//10.0;
 var g_yAngle = 0.0;
 
 var canvas;
@@ -549,11 +549,58 @@ function buildTable(gl, u_ModelMatrix, u_NormalMatrix, n, translate_x, translate
   modelMatrix = popMatrix();
 }
 
+function buildLamp(gl, u_ModelMatrix, u_NormalMatrix, n, translate_x, translate_y, translate_z, face) {
+  pushMatrix(modelMatrix);
+  modelMatrix.translate(translate_x, translate_y, translate_z);  
+  modelMatrix.scale(0.5, 5.0, 0.5);
+  drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
+  modelMatrix = popMatrix();
+  
+  pushMatrix(modelMatrix);
+  modelMatrix.translate(translate_x-0.75, translate_y-2, translate_z-0.75);
+  modelMatrix.scale(2.0, 1, 2.0); 
+  drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
+  modelMatrix = popMatrix();
+
+  pushMatrix(modelMatrix);
+  modelMatrix.translate(translate_x, translate_y-2, translate_z);  
+  modelMatrix.scale(0.5, 8.0, 0.5);
+  drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
+  modelMatrix = popMatrix();
+
+  pushMatrix(modelMatrix);
+  modelMatrix.translate(translate_x-0.75, translate_y+5, translate_z-0.75);  
+  modelMatrix.scale(2.0, 3.0, 2.0);
+  drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
+  modelMatrix = popMatrix();
+}
+
+function buildTvStand(gl, u_ModelMatrix, u_NormalMatrix, n, translate_x, translate_y, translate_z, face) {
+  pushMatrix(modelMatrix);
+  modelMatrix.translate(translate_x, translate_y, translate_z);
+  modelMatrix.scale(3.0, 0.5, 10.0); 
+  drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
+  modelMatrix = popMatrix();
+
+  pushMatrix(modelMatrix);
+  modelMatrix.translate(translate_x+0.4, translate_y-2, translate_z+.4);
+  modelMatrix.scale(2.2, 2.5, 9.2); 
+  drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
+  modelMatrix = popMatrix();
+}
+
 function buildScene(gl, u_ModelMatrix, u_NormalMatrix, u_isLighting) {
-  buildChair(gl, u_ModelMatrix, u_NormalMatrix, initVertexBuffers(gl, 0.55, 0.35, 0.1), 1, 0, 10, "far");
-  buildChair(gl, u_ModelMatrix, u_NormalMatrix, initVertexBuffers(gl, 0.55, 0.35, 0.1), 5, 0, 10, "far");
-  buildChair(gl, u_ModelMatrix, u_NormalMatrix, initVertexBuffers(gl, 0.55, 0.35, 0.1), 1, 0, 19, "near");
-  buildChair(gl, u_ModelMatrix, u_NormalMatrix, initVertexBuffers(gl, 0.55, 0.35, 0.1), 5, 0, 19, "near");
-  buildTable(gl, u_ModelMatrix, u_NormalMatrix, initVertexBuffers(gl, 77/117, 40/117, 0.3), 1, 1, 13);
+  buildChair(gl, u_ModelMatrix, u_NormalMatrix, initVertexBuffers(gl, 0.55, 0.35, 0.1), 1, 0, 13, "far");
+  buildChair(gl, u_ModelMatrix, u_NormalMatrix, initVertexBuffers(gl, 0.55, 0.35, 0.1), 5, 0, 13, "far");
+  buildChair(gl, u_ModelMatrix, u_NormalMatrix, initVertexBuffers(gl, 0.55, 0.35, 0.1), 1, 0, 22, "near");
+  buildChair(gl, u_ModelMatrix, u_NormalMatrix, initVertexBuffers(gl, 0.55, 0.35, 0.1), 5, 0, 22, "near");
+
+  buildTable(gl, u_ModelMatrix, u_NormalMatrix, initVertexBuffers(gl, 77/117, 40/117, 0.3), 1, 1, 16);
+  
+  buildLamp(gl, u_ModelMatrix, u_NormalMatrix, initVertexBuffers(gl, 77/117, 40/117, 0.3), 23, 0, 2);
+  buildLamp(gl, u_ModelMatrix, u_NormalMatrix, initVertexBuffers(gl, 77/117, 40/117, 0.3), 23, 0, 22);
+  
+  buildTvStand(gl, u_ModelMatrix, u_NormalMatrix, initVertexBuffers(gl, 77/11, 40/117, 0.3), 21.5, 0, 8);
+ 
   buildFloor(gl, u_ModelMatrix, u_NormalMatrix, initVertexBuffers(gl, 1, 1, 1));
 }
