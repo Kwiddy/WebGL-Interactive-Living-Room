@@ -675,6 +675,80 @@ function buildPouffe(gl, u_ModelMatrix, u_NormalMatrix, n, translate_x, translat
   modelMatrix = popMatrix();
 }
 
+function buildSofa(gl, u_ModelMatrix, u_NormalMatrix, n, translate_x, translate_y, translate_z, face) {
+  pushMatrix(modelMatrix);
+  modelMatrix.translate(translate_x, translate_y-1.5, translate_z-1);  
+  modelMatrix.scale(3.0, 1.25, 12);
+  drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
+  modelMatrix = popMatrix();
+
+  pushMatrix(modelMatrix);
+  modelMatrix.translate(translate_x, translate_y-0.5, translate_z+1.9);  
+  modelMatrix.scale(3.125, 0.75, 2.95);
+  drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
+  modelMatrix = popMatrix();
+
+  pushMatrix(modelMatrix);
+  modelMatrix.translate(translate_x, translate_y-0.5, translate_z-1.125);  
+  modelMatrix.scale(3.125, 0.75, 2.95);
+  drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
+  modelMatrix = popMatrix();
+
+  pushMatrix(modelMatrix);
+  modelMatrix.translate(translate_x, translate_y-0.5, translate_z+4.9);  
+  modelMatrix.scale(3.125, 0.75, 2.95);
+  drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
+  modelMatrix = popMatrix();
+
+  pushMatrix(modelMatrix);
+  modelMatrix.translate(translate_x, translate_y-0.5, translate_z+7.9);  
+  modelMatrix.scale(3.125, 0.75, 3.1);
+  drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
+  modelMatrix = popMatrix();
+
+  pushMatrix(modelMatrix);
+  modelMatrix.translate(translate_x, translate_y-1.5, translate_z+11);  
+  modelMatrix.scale(3.125, 3, 1);
+  drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
+  modelMatrix = popMatrix();
+
+  pushMatrix(modelMatrix);
+  modelMatrix.translate(translate_x, translate_y-1.5, translate_z-2);  
+  modelMatrix.scale(3.125, 3, 1);
+  drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
+  modelMatrix = popMatrix();
+
+  pushMatrix(modelMatrix);
+  modelMatrix.translate(translate_x-0.75, translate_y-1.5, translate_z-2);  
+  modelMatrix.scale(0.75, 4, 14);
+  drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
+  modelMatrix = popMatrix();
+
+  pushMatrix(modelMatrix);
+  modelMatrix.translate(translate_x-0.5, translate_y-2, translate_z-2);  
+  modelMatrix.scale(0.5, 0.5, 0.5);
+  drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
+  modelMatrix = popMatrix();
+
+  pushMatrix(modelMatrix);
+  modelMatrix.translate(translate_x-0.5, translate_y-2, translate_z+11.5);  
+  modelMatrix.scale(0.5, 0.5, 0.5);
+  drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
+  modelMatrix = popMatrix();
+
+  pushMatrix(modelMatrix);
+  modelMatrix.translate(translate_x+2.5, translate_y-2, translate_z+11.5);  
+  modelMatrix.scale(0.5, 0.5, 0.5);
+  drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
+  modelMatrix = popMatrix();
+
+  pushMatrix(modelMatrix);
+  modelMatrix.translate(translate_x+2.5, translate_y-2, translate_z-2);  
+  modelMatrix.scale(0.5, 0.5, 0.5);
+  drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
+  modelMatrix = popMatrix();
+}
+
 function buildScene(gl, u_ModelMatrix, u_NormalMatrix, u_isLighting) {
   buildChair(gl, u_ModelMatrix, u_NormalMatrix, initVertexBuffers(gl, 0.55, 0.35, 0.1), 1, 0, 13, "far");
   buildChair(gl, u_ModelMatrix, u_NormalMatrix, initVertexBuffers(gl, 0.55, 0.35, 0.1), 5, 0, 13, "far");
@@ -690,6 +764,7 @@ function buildScene(gl, u_ModelMatrix, u_NormalMatrix, u_isLighting) {
   
   buildTvStand(gl, u_ModelMatrix, u_NormalMatrix, initVertexBuffers(gl, 77/11, 40/117, 0.3), 21.5, 0, 8);
 
+  buildSofa(gl, u_ModelMatrix, u_NormalMatrix, initVertexBuffers(gl, 77/11, 40/117, 0.3), 13, 0, 9);
   buildPouffe(gl, u_ModelMatrix, u_NormalMatrix, initVertexBuffers(gl, 77/11, 40/117, 0.3), 17, 0, 18);
  
   buildFloor(gl, u_ModelMatrix, u_NormalMatrix, initVertexBuffers(gl, 1, 1, 1));
