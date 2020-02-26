@@ -254,13 +254,11 @@ function keydown(ev, gl, u_ViewMatrix) {
         case 67: //c (animate chair)
             chairPos -= 0.25;
             buildScene(gl, u_ModelMatrix, u_NormalMatrix, u_isLighting);
-        case 84:
-            if(screenOn) {
-              screenOn = false;
-            } else {
-              screenOn = true;
-            }
+            break;
+        case 84: //t (animate TV)
+            screenOn = !screenOn;
             buildScene(gl, u_ModelMatrix, u_NormalMatrix, u_isLighting);
+            break;
         default: return;
     }
     viewMatrix.setLookAt(a1_View, a2_View, a3_View, b1_View, b2_View, b3_View, c1_View, c2_View, c3_View);
