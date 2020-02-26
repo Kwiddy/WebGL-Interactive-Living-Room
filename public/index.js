@@ -52,6 +52,8 @@ var projMatrix = new Matrix4();
 var g_normalMatrix = new Matrix4();
 
 var g_matrixStack = []; 
+var textures = [];
+var images = [];
 
 var a1_View = 18;
 var a2_View = -5;
@@ -85,7 +87,7 @@ var u_isLighting;
 
 var loaded;
 var texture;
-var floorplanksTEX;
+var img1;
 
 var a_Position;
 
@@ -149,28 +151,35 @@ function main() {
 
     //var n = initVertexBuffers(gl, 0.55, 0.35, 0.1);
 
-    loaded = false;
-    floorplanksTEX = new Image();
+    img1 = new Image();
+    img2 = new Image();
+    img3 = new Image();
 
-    floorplanksTEX.onload = function() {
-      texture = gl.createTexture();
-      loaded = true;
-    };
+    img1.src = "originalsquarewood.png";
+    img2.src = "verticalplanks_256x256.jpg";
+    img3.src = "carpet2_256x256.jpg";
 
-    floorplanksTEX.src = "originalsquarewood.png";
+    images.push(img1);
+    images.push(img2);
+    images.push(img3);
 
-    // floorplanksTEX.src = "wood.png";
-    //floorplanksTEX.src = "carpet.jpg";
-    //floorplanksTEX.src = "squarewood.jpg"
-    // floorplanksTEX.src = "carpet2_256x256.jpg";
-    //  floorplanksTEX.src = "wood3_256x256.jpg";
-    // floorplanksTEX.src = "verticalplanks_256x256.jpg";
-    // floorplanksTEX.src = "verticalplanks2_256x256.jpg";
-    // floorplanksTEX.src = "darkwoodplanks_256x256.jpg";
-    //  floorplanksTEX.src = "woodplank3_256x256.jpg";
-    // floorplanksTEX.src = "darkwoodplank2_256x256.jpg";
-    // floorplanksTEX.src = "rustywoodplanks_256x256.jpg";
-    // floorplanksTEX.src = "rustyplank2_256x256.jpg";   
+    console.log(images);
+
+    // img1.src = "originalsquarewood.png";
+    // img1.src = "wood.png";
+    //img1.src = "carpet.jpg";
+    //img1.src = "squarewood.jpg"
+    // img1.src = "carpet2_256x256.jpg";
+    //  img1.src = "wood3_256x256.jpg";
+    // img1.src = "verticalplanks_256x256.jpg";
+    // img1.src = "verticalplanks2_256x256.jpg";
+    // img1.src = "darkwoodplanks_256x256.jpg";
+    //  img1.src = "woodplank3_256x256.jpg";
+    // img1.src = "darkwoodplank2_256x256.jpg";
+    // img1.src = "rustywoodplanks_256x256.jpg";
+    // img1.src = "rustyplank2_256x256.jpg";
+
+    img3.onload = function() {initTexture(gl, u_Sampler, u_UseTextures, images);};   
 
     requestAnimationFrame(update);
 };
@@ -236,16 +245,16 @@ function initVertexBuffers(gl, rVal, gVal, bVal) {
       0.5,-0.5,-0.5,  -0.5,-0.5,-0.5,  -0.5, 0.5,-0.5,   0.5, 0.5,-0.5  
     ]);
   
-    if(!loaded) {
-      var colors = new Float32Array([    
-        rVal, gVal, bVal,   rVal, gVal, bVal,   rVal, gVal, bVal,  rVal, gVal, bVal,     
-        rVal, gVal, bVal,   rVal, gVal, bVal,   rVal, gVal, bVal,  rVal, gVal, bVal,     
-        rVal, gVal, bVal,   rVal, gVal, bVal,   rVal, gVal, bVal,  rVal, gVal, bVal,     
-        rVal, gVal, bVal,   rVal, gVal, bVal,   rVal, gVal, bVal,  rVal, gVal, bVal,     
-        rVal, gVal, bVal,   rVal, gVal, bVal,   rVal, gVal, bVal,  rVal, gVal, bVal,     
-        rVal, gVal, bVal,   rVal, gVal, bVal,   rVal, gVal, bVal,  rVal, gVal, bVal　    
-      ]);
-    }
+    // if(!loaded) {
+    //   var colors = new Float32Array([    
+    //     rVal, gVal, bVal,   rVal, gVal, bVal,   rVal, gVal, bVal,  rVal, gVal, bVal,     
+    //     rVal, gVal, bVal,   rVal, gVal, bVal,   rVal, gVal, bVal,  rVal, gVal, bVal,     
+    //     rVal, gVal, bVal,   rVal, gVal, bVal,   rVal, gVal, bVal,  rVal, gVal, bVal,     
+    //     rVal, gVal, bVal,   rVal, gVal, bVal,   rVal, gVal, bVal,  rVal, gVal, bVal,     
+    //     rVal, gVal, bVal,   rVal, gVal, bVal,   rVal, gVal, bVal,  rVal, gVal, bVal,     
+    //     rVal, gVal, bVal,   rVal, gVal, bVal,   rVal, gVal, bVal,  rVal, gVal, bVal　    
+    //   ]);
+    // }
     
     var normals = new Float32Array([    
       0.0, 0.0, 1.0,   0.0, 0.0, 1.0,   0.0, 0.0, 1.0,   0.0, 0.0, 1.0,  
@@ -282,7 +291,7 @@ function initVertexBuffers(gl, rVal, gVal, bVal) {
     var n=36;
 
     if (!initArrayBuffer(gl, 'a_Position', vertices, 3, gl.FLOAT)) return -1;
-    if(!loaded && !initArrayBuffer(gl, 'a_Color', colors, 3, gl.FLOAT)) return -1
+    // if(!loaded && !initArrayBuffer(gl, 'a_Color', colors, 3, gl.FLOAT)) return -1
     if (!initArrayBuffer(gl, 'a_Normal', normals, 3, gl.FLOAT)) return -1;
 
     var vertexTexCoordBuffer = gl.createBuffer();
@@ -409,23 +418,33 @@ function draw(gl, u_ModelMatrix, u_NormalMatrix, u_isLighting) {
   modelMatrix.rotate(g_yAngle, 0, 1, 0); 
   modelMatrix.rotate(g_xAngle, 1, 0, 0);
 
-  try {
-    render(loaded);
+  console.log("here");
 
-    function render(loaded) {
-      if(loaded) {
-        drawTexture(gl, n, floorplanksTEX, u_Sampler, u_UseTextures, texture);
-        buildScene(gl, u_ModelMatrix, u_NormalMatrix, u_isLighting);
-      } 
-  }
+  initTexture(gl, u_Sampler, u_UseTextures, images);
+  buildScene(gl, u_ModelMatrix, u_NormalMatrix, u_isLighting);
 
-  } catch {
-    console.log('Failed to initialize textures');
-    return;
-  }    
+  // try {
+  //   render(loaded);
+
+  //   function render(loaded) {
+  //     if(loaded) {
+  //       console.log("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
+  //       initTexture(gl, u_Sampler, u_UseTextures, images);
+  //       buildScene(gl, u_ModelMatrix, u_NormalMatrix, u_isLighting);
+  //     } else {
+  //       console.log("there");
+  //     }
+  // }
+
+  // } catch {
+  //   console.log('Failed to initialize textures');
+  //   return;
+  // }
+
 }
 
 function drawbox(gl, u_ModelMatrix, u_NormalMatrix, n) {
+  
   pushMatrix(modelMatrix);
 
     gl.uniformMatrix4fv(u_ModelMatrix, false, modelMatrix.elements);
@@ -439,30 +458,40 @@ function drawbox(gl, u_ModelMatrix, u_NormalMatrix, n) {
   modelMatrix = popMatrix();
 }
 
-function drawTexture(gl, n, image, u_Sampler, u_UseTextures, texture){
-  gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, 1);
-  gl.activeTexture(gl.TEXTURE0);
-  gl.bindTexture(gl.TEXTURE_2D, texture);
+function initTexture(gl, u_Sampler, u_UseTextures, images){
 
-  try {
-    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
-  } catch(e) {
-      console.log(typeof(image));
-      console.log(e);
+  console.log("calling initTextures");
+
+  for(i=0; i<images.length; i++) {
+    var texture = gl.createTexture();
+
+    // gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, 1);
+    // gl.activeTexture(gl.TEXTURE0);
+    gl.bindTexture(gl.TEXTURE_2D, texture);
+
+    try {
+      gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, images[i]);
+    } catch(e) {
+        console.log(typeof(images[i]));
+        console.log(e);
+    }
+
+    if(isPowerof2(images[i].width) && isPowerof2(images[i].height)) {
+      gl.generateMipmap(gl.TEXTURE_2D);
+    } else {
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+    }
+
+    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+    gl.uniform1i(u_Sampler, 0);
+    gl.uniform1i(u_UseTextures, true);
+    //gl.drawElements(gl.TRIANGLES, n, gl.UNSIGNED_BYTE, 0);
+
+    textures.push(texture);
   }
-
-  if(isPowerof2(image.width) && isPowerof2(image.height)) {
-    gl.generateMipmap(gl.TEXTURE_2D);
-  } else {
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-  }
-
-  gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-  gl.uniform1i(u_Sampler, 0);
-  gl.uniform1i(u_UseTextures, true);
-  //gl.drawElements(gl.TRIANGLES, n, gl.UNSIGNED_BYTE, 0);
+  console.log(textures)
 }
 
 function buildChair(gl, u_ModelMatrix, u_NormalMatrix, n, translate_x, translate_y, translate_z, face) {
@@ -512,6 +541,7 @@ function buildChair(gl, u_ModelMatrix, u_NormalMatrix, n, translate_x, translate
 }
 
 function buildFloor(gl, u_ModelMatrix, u_NormalMatrix, n) {
+  gl.bindTexture(gl.TEXTURE_2D, textures[0]);
   pushMatrix(modelMatrix);
   modelMatrix.translate(0, -2.04, 0);
   modelMatrix.scale(25.0, 0.1, 25.0); 
@@ -520,6 +550,7 @@ function buildFloor(gl, u_ModelMatrix, u_NormalMatrix, n) {
 }
 
 function buildTable(gl, u_ModelMatrix, u_NormalMatrix, n, translate_x, translate_y, translate_z) {
+  gl.bindTexture(gl.TEXTURE_2D, textures[1]);
   pushMatrix(modelMatrix);
   modelMatrix.translate(translate_x, translate_y, translate_z);
   modelMatrix.scale(6.5, 0.5, 5.0); 
