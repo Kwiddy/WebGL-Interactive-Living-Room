@@ -91,6 +91,7 @@ var u_isLighting;
 var a_Position;
 
 var chairPos = 13;
+var platePresent = false;
 var screenOn = false;
 
 function main() {
@@ -163,6 +164,7 @@ function main() {
     img8 = new Image();
     img9 = new Image();
     img10 = new Image();
+    img11 = new Image();
 
     //Floor Texture
     img1.src = "originalsquarewood.png";
@@ -185,7 +187,7 @@ function main() {
     //Chair Texture
     img7.src = "woodboard_256x256.jpg"
 
-    //Lamp Stand
+    //Lamp Stand and cutlery
     img8.src = "metal2_256x256.jpg"
 
     //Lamp Head
@@ -193,6 +195,9 @@ function main() {
 
     //TV Screen Texture (On)
     img10.src = "blue_256x256.jpg"
+
+    //Plate white and cup white
+    img11.src = "white_256x256.jpg"
 
     images.push(img1);
     images.push(img2);
@@ -204,8 +209,9 @@ function main() {
     images.push(img8);
     images.push(img9);
     images.push(img10);
+    images.push(img11);
 
-    img10.onload = function() {initTexture(gl, u_Sampler, u_UseTextures, images);};   
+    img11.onload = function() {initTexture(gl, u_Sampler, u_UseTextures, images);};   
 
     requestAnimationFrame(update);
 };
@@ -256,8 +262,20 @@ function keydown(ev, gl, u_ViewMatrix) {
             a3_View += 0.25
             break;
         case 67: //c (animate chair)
-            chairPos -= 0.25;
-            buildScene(gl, u_ModelMatrix, u_NormalMatrix, u_isLighting, global_x, global_y, global_z);
+            if(chairPos != 11) {
+              platePresent = true;
+              while(chairPos != 11){
+                chairPos -= 0.25;
+                buildScene(gl, u_ModelMatrix, u_NormalMatrix, u_isLighting, global_x, global_y, global_z);
+              }
+            } 
+            else {
+              platePresent = false;
+              while(chairPos != 13){
+                chairPos += 0.25;
+                buildScene(gl, u_ModelMatrix, u_NormalMatrix, u_isLighting, global_x, global_y, global_z);
+              }
+            }
             break;
         case 84: //t (animate TV)
             screenOn = !screenOn;
@@ -755,6 +773,30 @@ function buildPouffe(gl, u_ModelMatrix, u_NormalMatrix, n, translate_x, translat
   modelMatrix = popMatrix();
 }
 
+function buildPlateSetup(gl, u_ModelMatrix, u_NormalMatrix, n, translate_x, translate_y, translate_z) {
+  gl.bindTexture(gl.TEXTURE_2D, textures[10]);
+  pushMatrix(modelMatrix);
+  modelMatrix.translate(translate_x-12, translate_y+1.5, translate_z-1.5);  
+  modelMatrix.scale(1.5, 0.15, 1.5);
+  drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
+  modelMatrix = popMatrix();
+
+  gl.bindTexture(gl.TEXTURE_2D, textures[7]);
+
+  pushMatrix(modelMatrix);
+  modelMatrix.translate(translate_x-10, translate_y+1.6, translate_z-1.5);  
+  modelMatrix.scale(0.2, 0.15, 1.5);
+  drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
+  modelMatrix = popMatrix();
+
+  pushMatrix(modelMatrix);
+  modelMatrix.translate(translate_x-12.5, translate_y+1.5, translate_z-1.5);  
+  modelMatrix.scale(0.2, 0.15, 1.5);
+  drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
+  modelMatrix = popMatrix();
+
+}
+
 function buildSofa(gl, u_ModelMatrix, u_NormalMatrix, n, translate_x, translate_y, translate_z) {
   gl.bindTexture(gl.TEXTURE_2D, textures[2]);
   pushMatrix(modelMatrix);
@@ -840,7 +882,10 @@ function buildScene(gl, u_ModelMatrix, u_NormalMatrix, u_isLighting, global_x, g
   buildTvScreen(gl, u_ModelMatrix, u_NormalMatrix, initVertexBuffers(gl, 77/11, 40/117, 0.3), global_x+22.5, global_y+0.5, global_z+10);
 
   buildTable(gl, u_ModelMatrix, u_NormalMatrix, initVertexBuffers(gl, 77/117, 40/117, 0.3), global_x+1, global_y+1, global_z+16);
-  
+  if(platePresent){
+    buildPlateSetup(gl, u_ModelMatrix, u_NormalMatrix, initVertexBuffers(gl, 77/11, 40/117, 0.3), global_x+17, global_y+0, global_z+18);
+  }
+
   buildLamp(gl, u_ModelMatrix, u_NormalMatrix, initVertexBuffers(gl, 77/117, 40/117, 0.3), global_x+23, global_y+0, global_z+2);
   buildLamp(gl, u_ModelMatrix, u_NormalMatrix, initVertexBuffers(gl, 77/117, 40/117, 0.3), global_x+23, global_y+0, global_z+22);
   
