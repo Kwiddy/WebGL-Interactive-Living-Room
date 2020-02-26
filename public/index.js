@@ -90,9 +90,12 @@ var u_isLighting;
 
 var a_Position;
 
-var chairPos = 13;
-var chairTowards = false;
-var chairAway = false;
+var chairPos1 = 13;
+var chairPos2 = 22;
+var chairTowards1 = false;
+var chairAway1 = false;
+var chairTowards2 = false;
+var chairAway2 = false;
 var platePos = 2;
 var platePresent = false;
 
@@ -237,19 +240,34 @@ function update() {
 }
 
 function dinnertime() {
-  if(chairAway) {
-    if(chairPos == 11){
-      chairAway = false;
+  if(chairAway1) {
+    if(chairPos1 == 11){
+      chairAway1 = false;
     } else {
-      chairPos -= 0.25;
+      chairPos1 -= 0.25;
     } 
-  } else if(chairTowards) {
-    if(chairPos == 13){
-      chairTowards = false;
+  } else if(chairTowards1) {
+    if(chairPos1 == 13){
+      chairTowards1 = false;
     } else {
-      chairPos += 0.25
+      chairPos1 += 0.25
     }
   }
+
+  if(chairTowards2) {
+    if(chairPos2 == 24){
+      chairTowards2 = false;
+    } else {
+      chairPos2 += 0.25;
+    } 
+  } else if(chairAway2) {
+      if(chairPos2 == 22){
+        chairAway2 = false;
+      } else {
+        chairPos2 -= 0.25;
+      }
+  }
+
   if(platePresent) {
     if(platePos != 0) {
       platePos -= 0.25;
@@ -333,14 +351,21 @@ function keydown(ev, gl, u_ViewMatrix) {
             a3_View += 0.25;
             break;
         case 67: //c (animate chair and plate & cutlery)
-            if(chairPos == 13) {
+            if(chairPos1 == 13) {
               platePresent = true;
-              chairAway = true;
+              chairAway1 = true;
             } 
             else {
               platePresent = false;
               platePos = 2;
-              chairTowards = true;
+              chairTowards1 = true;
+              }
+              
+            if(chairPos2 == 22) {
+              chairTowards2 = true;
+            } 
+            else {
+              chairAway2 = true;
               }
             break;
         case 84: //t (animate TV)
@@ -666,8 +691,8 @@ function buildChair(gl, u_ModelMatrix, u_NormalMatrix, n, translate_x, translate
 function buildFloor(gl, u_ModelMatrix, u_NormalMatrix, n, translate_x, translate_y, translate_z) {
   gl.bindTexture(gl.TEXTURE_2D, textures[0]);
   pushMatrix(modelMatrix);
-  modelMatrix.translate(translate_x, translate_y-2.04, translate_z);
-  modelMatrix.scale(25.0, 0.1, 25.0); 
+  modelMatrix.translate(translate_x, translate_y-2.04, translate_z+2);
+  modelMatrix.scale(25.0, 0.1, 27.0); 
   drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
   modelMatrix = popMatrix();
 }
@@ -948,10 +973,10 @@ function buildSofa(gl, u_ModelMatrix, u_NormalMatrix, n, translate_x, translate_
 }
 
 function buildScene(gl, u_ModelMatrix, u_NormalMatrix, u_isLighting, global_x, global_y, global_z) {
-  buildChair(gl, u_ModelMatrix, u_NormalMatrix, initVertexBuffers(gl, 0.55, 0.35, 0.1), global_x+1, global_y+0, global_z+chairPos, "far");
-  buildChair(gl, u_ModelMatrix, u_NormalMatrix, initVertexBuffers(gl, 0.55, 0.35, 0.1), global_x+5, global_y+0, global_z+chairPos, "far");
-  buildChair(gl, u_ModelMatrix, u_NormalMatrix, initVertexBuffers(gl, 0.55, 0.35, 0.1), global_x+1, global_y+0, global_z+22, "near");
-  buildChair(gl, u_ModelMatrix, u_NormalMatrix, initVertexBuffers(gl, 0.55, 0.35, 0.1), global_x+5, global_y+0, global_z+22, "near");
+  buildChair(gl, u_ModelMatrix, u_NormalMatrix, initVertexBuffers(gl, 0.55, 0.35, 0.1), global_x+1, global_y+0, global_z+chairPos1, "far");
+  buildChair(gl, u_ModelMatrix, u_NormalMatrix, initVertexBuffers(gl, 0.55, 0.35, 0.1), global_x+5, global_y+0, global_z+chairPos1, "far");
+  buildChair(gl, u_ModelMatrix, u_NormalMatrix, initVertexBuffers(gl, 0.55, 0.35, 0.1), global_x+1, global_y+0, global_z+chairPos2, "near");
+  buildChair(gl, u_ModelMatrix, u_NormalMatrix, initVertexBuffers(gl, 0.55, 0.35, 0.1), global_x+5, global_y+0, global_z+chairPos2, "near");
 
   buildTv(gl, u_ModelMatrix, u_NormalMatrix, initVertexBuffers(gl, 77/11, 40/117, 0.3), global_x+22.5, global_y+TVPos+0.5, global_z+10);
   buildTvScreen(gl, u_ModelMatrix, u_NormalMatrix, initVertexBuffers(gl, 77/11, 40/117, 0.3), global_x+22.5, global_y+TVPos+0.5, global_z+10);
@@ -960,6 +985,8 @@ function buildScene(gl, u_ModelMatrix, u_NormalMatrix, u_isLighting, global_x, g
   if(platePresent){
     buildPlateSetup(gl, u_ModelMatrix, u_NormalMatrix, initVertexBuffers(gl, 77/11, 40/117, 0.3), global_x+17, global_y+platePos, global_z+18);
     buildPlateSetup(gl, u_ModelMatrix, u_NormalMatrix, initVertexBuffers(gl, 77/11, 40/117, 0.3), global_x+13.75, global_y+platePos, global_z+18);
+    buildPlateSetup(gl, u_ModelMatrix, u_NormalMatrix, initVertexBuffers(gl, 77/11, 40/117, 0.3), global_x+17, global_y+platePos, global_z+20);
+    buildPlateSetup(gl, u_ModelMatrix, u_NormalMatrix, initVertexBuffers(gl, 77/11, 40/117, 0.3), global_x+13.75, global_y+platePos, global_z+20);
   }
 
   buildLamp(gl, u_ModelMatrix, u_NormalMatrix, initVertexBuffers(gl, 77/117, 40/117, 0.3), global_x+23, global_y+0, global_z+2);
