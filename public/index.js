@@ -94,12 +94,15 @@ var chairPos = 13;
 var chairTowards = false;
 var chairAway = false;
 var platePos = 2;
+var platePresent = false;
 
 var pouffePos = 18;
 var pouffeAway = false;
 var pouffeTowards = false;
 
-var platePresent = false;
+var tvBounce = false;
+var TVPos = 0;
+var TVUp = 1;
 var screenOn = false;
 
 function main() {
@@ -227,6 +230,7 @@ function main() {
 function update() {
   dinnertime();
   movePouffe();
+  tvbop();
 
   draw(gl, u_ModelMatrix, u_NormalMatrix, u_isLighting);
   requestAnimationFrame(update);
@@ -265,6 +269,25 @@ function movePouffe() {
       pouffeTowards = false;
     } else {
       pouffePos += 0.25
+    }
+  }
+}
+
+function tvbop() {
+  if(tvBounce) {
+    if(TVUp == 1) {
+      if(TVPos != 0.75) {
+        TVPos += 0.25;
+      } else {
+        TVUp = -1;
+      }
+    } else {
+      if(TVPos != 0) {
+        TVPos -= 0.25;
+      } else {
+        TVUp = 1;
+        tvBounce = !tvBounce;
+      }
     }
   }
 }
@@ -322,7 +345,7 @@ function keydown(ev, gl, u_ViewMatrix) {
             break;
         case 84: //t (animate TV)
             screenOn = !screenOn;
-            buildScene(gl, u_ModelMatrix, u_NormalMatrix, u_isLighting, global_x, global_y, global_z);
+            tvBounce = true;
             break;
         case 80: //p (animate Pouffe)
         if(pouffePos == 18) {
@@ -930,8 +953,8 @@ function buildScene(gl, u_ModelMatrix, u_NormalMatrix, u_isLighting, global_x, g
   buildChair(gl, u_ModelMatrix, u_NormalMatrix, initVertexBuffers(gl, 0.55, 0.35, 0.1), global_x+1, global_y+0, global_z+22, "near");
   buildChair(gl, u_ModelMatrix, u_NormalMatrix, initVertexBuffers(gl, 0.55, 0.35, 0.1), global_x+5, global_y+0, global_z+22, "near");
 
-  buildTv(gl, u_ModelMatrix, u_NormalMatrix, initVertexBuffers(gl, 77/11, 40/117, 0.3), global_x+22.5, global_y+0.5, global_z+10);
-  buildTvScreen(gl, u_ModelMatrix, u_NormalMatrix, initVertexBuffers(gl, 77/11, 40/117, 0.3), global_x+22.5, global_y+0.5, global_z+10);
+  buildTv(gl, u_ModelMatrix, u_NormalMatrix, initVertexBuffers(gl, 77/11, 40/117, 0.3), global_x+22.5, global_y+TVPos+0.5, global_z+10);
+  buildTvScreen(gl, u_ModelMatrix, u_NormalMatrix, initVertexBuffers(gl, 77/11, 40/117, 0.3), global_x+22.5, global_y+TVPos+0.5, global_z+10);
 
   buildTable(gl, u_ModelMatrix, u_NormalMatrix, initVertexBuffers(gl, 77/117, 40/117, 0.3), global_x+1, global_y+1, global_z+16);
   if(platePresent){
@@ -944,7 +967,7 @@ function buildScene(gl, u_ModelMatrix, u_NormalMatrix, u_isLighting, global_x, g
   
   buildTvStand(gl, u_ModelMatrix, u_NormalMatrix, initVertexBuffers(gl, 77/11, 40/117, 0.3), global_x+21.5, global_y+0, global_z+8);
 
-  buildSofa(gl, u_ModelMatrix, u_NormalMatrix, initVertexBuffers(gl, 77/11, 40/117, 0.3), global_x+13, global_y+0, global_z+9);
+  buildSofa(gl, u_ModelMatrix, u_NormalMatrix, initVertexBuffers(gl, 77/11, 40/117, 0.3), global_x+13, global_y, global_z+9);
   buildPouffe(gl, u_ModelMatrix, u_NormalMatrix, initVertexBuffers(gl, 77/11, 40/117, 0.3), global_x+17, global_y+0, global_z+pouffePos);
  
   buildFloor(gl, u_ModelMatrix, u_NormalMatrix, initVertexBuffers(gl, 1, 1, 1), global_x, global_y, global_z);
