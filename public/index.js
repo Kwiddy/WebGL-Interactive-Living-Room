@@ -55,6 +55,10 @@ var g_matrixStack = [];
 var textures = [];
 var images = [];
 
+var global_x = 0;
+var global_y = 0;
+var global_z = 0;
+
 var a1_View = 18;
 var a2_View = -5;
 var a3_View = 60;
@@ -253,11 +257,11 @@ function keydown(ev, gl, u_ViewMatrix) {
             break;
         case 67: //c (animate chair)
             chairPos -= 0.25;
-            buildScene(gl, u_ModelMatrix, u_NormalMatrix, u_isLighting);
+            buildScene(gl, u_ModelMatrix, u_NormalMatrix, u_isLighting, global_x, global_y, global_z);
             break;
         case 84: //t (animate TV)
             screenOn = !screenOn;
-            buildScene(gl, u_ModelMatrix, u_NormalMatrix, u_isLighting);
+            buildScene(gl, u_ModelMatrix, u_NormalMatrix, u_isLighting, global_x, global_y, global_z);
             break;
         default: return;
     }
@@ -448,7 +452,7 @@ function draw(gl, u_ModelMatrix, u_NormalMatrix, u_isLighting) {
   modelMatrix.rotate(g_yAngle, 0, 1, 0); 
   modelMatrix.rotate(g_xAngle, 1, 0, 0);
 
-  buildScene(gl, u_ModelMatrix, u_NormalMatrix, u_isLighting);
+  buildScene(gl, u_ModelMatrix, u_NormalMatrix, u_isLighting, global_x, global_y, global_z);
 
   // try {
   //   render(loaded);
@@ -566,10 +570,10 @@ function buildChair(gl, u_ModelMatrix, u_NormalMatrix, n, translate_x, translate
   modelMatrix = popMatrix();
 }
 
-function buildFloor(gl, u_ModelMatrix, u_NormalMatrix, n) {
+function buildFloor(gl, u_ModelMatrix, u_NormalMatrix, n, translate_x, translate_y, translate_z) {
   gl.bindTexture(gl.TEXTURE_2D, textures[0]);
   pushMatrix(modelMatrix);
-  modelMatrix.translate(0, -2.04, 0);
+  modelMatrix.translate(translate_x, translate_y-2.04, translate_z);
   modelMatrix.scale(25.0, 0.1, 25.0); 
   drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
   modelMatrix = popMatrix();
@@ -608,7 +612,7 @@ function buildTable(gl, u_ModelMatrix, u_NormalMatrix, n, translate_x, translate
   modelMatrix = popMatrix();
 }
 
-function buildLamp(gl, u_ModelMatrix, u_NormalMatrix, n, translate_x, translate_y, translate_z, face) {  
+function buildLamp(gl, u_ModelMatrix, u_NormalMatrix, n, translate_x, translate_y, translate_z) {  
   gl.bindTexture(gl.TEXTURE_2D, textures[7]);
   pushMatrix(modelMatrix);
   modelMatrix.translate(translate_x-0.75, translate_y-2, translate_z-0.75);
@@ -631,7 +635,7 @@ function buildLamp(gl, u_ModelMatrix, u_NormalMatrix, n, translate_x, translate_
   modelMatrix = popMatrix();
 }
 
-function buildTvStand(gl, u_ModelMatrix, u_NormalMatrix, n, translate_x, translate_y, translate_z, face) {
+function buildTvStand(gl, u_ModelMatrix, u_NormalMatrix, n, translate_x, translate_y, translate_z) {
   gl.bindTexture(gl.TEXTURE_2D, textures[3]);
   pushMatrix(modelMatrix);
   modelMatrix.translate(translate_x, translate_y, translate_z);
@@ -646,7 +650,7 @@ function buildTvStand(gl, u_ModelMatrix, u_NormalMatrix, n, translate_x, transla
   modelMatrix = popMatrix();
 }
 
-function buildTv(gl, u_ModelMatrix, u_NormalMatrix, n, translate_x, translate_y, translate_z, face) {
+function buildTv(gl, u_ModelMatrix, u_NormalMatrix, n, translate_x, translate_y, translate_z) {
   gl.bindTexture(gl.TEXTURE_2D, textures[4]);
   pushMatrix(modelMatrix);
   modelMatrix.translate(translate_x, translate_y, translate_z);
@@ -699,7 +703,7 @@ function buildTv(gl, u_ModelMatrix, u_NormalMatrix, n, translate_x, translate_y,
 
 }
 
-function buildTvScreen(gl, u_ModelMatrix, u_NormalMatrix, n, translate_x, translate_y, translate_z, face) {
+function buildTvScreen(gl, u_ModelMatrix, u_NormalMatrix, n, translate_x, translate_y, translate_z) {
   if(screenOn){
     gl.bindTexture(gl.TEXTURE_2D, textures[9]);
   } else {
@@ -713,7 +717,7 @@ function buildTvScreen(gl, u_ModelMatrix, u_NormalMatrix, n, translate_x, transl
 
 }
 
-function buildPouffe(gl, u_ModelMatrix, u_NormalMatrix, n, translate_x, translate_y, translate_z, face) {
+function buildPouffe(gl, u_ModelMatrix, u_NormalMatrix, n, translate_x, translate_y, translate_z) {
   pushMatrix(modelMatrix);
   modelMatrix.translate(translate_x, translate_y-1.5, translate_z-1);  
   modelMatrix.scale(3.0, 1.25, 3);
@@ -751,7 +755,7 @@ function buildPouffe(gl, u_ModelMatrix, u_NormalMatrix, n, translate_x, translat
   modelMatrix = popMatrix();
 }
 
-function buildSofa(gl, u_ModelMatrix, u_NormalMatrix, n, translate_x, translate_y, translate_z, face) {
+function buildSofa(gl, u_ModelMatrix, u_NormalMatrix, n, translate_x, translate_y, translate_z) {
   gl.bindTexture(gl.TEXTURE_2D, textures[2]);
   pushMatrix(modelMatrix);
   modelMatrix.translate(translate_x, translate_y-1.5, translate_z-1);  
@@ -826,24 +830,24 @@ function buildSofa(gl, u_ModelMatrix, u_NormalMatrix, n, translate_x, translate_
   modelMatrix = popMatrix();
 }
 
-function buildScene(gl, u_ModelMatrix, u_NormalMatrix, u_isLighting) {
-  buildChair(gl, u_ModelMatrix, u_NormalMatrix, initVertexBuffers(gl, 0.55, 0.35, 0.1), 1, 0, 13, "far");
-  buildChair(gl, u_ModelMatrix, u_NormalMatrix, initVertexBuffers(gl, 0.55, 0.35, 0.1), 5, 0, chairPos, "far");
-  buildChair(gl, u_ModelMatrix, u_NormalMatrix, initVertexBuffers(gl, 0.55, 0.35, 0.1), 1, 0, 22, "near");
-  buildChair(gl, u_ModelMatrix, u_NormalMatrix, initVertexBuffers(gl, 0.55, 0.35, 0.1), 5, 0, 22, "near");
+function buildScene(gl, u_ModelMatrix, u_NormalMatrix, u_isLighting, global_x, global_y, global_z) {
+  buildChair(gl, u_ModelMatrix, u_NormalMatrix, initVertexBuffers(gl, 0.55, 0.35, 0.1), global_x+1, global_y+0, global_z+13, "far");
+  buildChair(gl, u_ModelMatrix, u_NormalMatrix, initVertexBuffers(gl, 0.55, 0.35, 0.1), global_x+5, global_y+0, global_z+chairPos, "far");
+  buildChair(gl, u_ModelMatrix, u_NormalMatrix, initVertexBuffers(gl, 0.55, 0.35, 0.1), global_x+1, global_y+0, global_z+22, "near");
+  buildChair(gl, u_ModelMatrix, u_NormalMatrix, initVertexBuffers(gl, 0.55, 0.35, 0.1), global_x+5, global_y+0, global_z+22, "near");
 
-  buildTv(gl, u_ModelMatrix, u_NormalMatrix, initVertexBuffers(gl, 77/11, 40/117, 0.3), 22.5, 0.5, 10);
-  buildTvScreen(gl, u_ModelMatrix, u_NormalMatrix, initVertexBuffers(gl, 77/11, 40/117, 0.3), 22.5, 0.5, 10);
+  buildTv(gl, u_ModelMatrix, u_NormalMatrix, initVertexBuffers(gl, 77/11, 40/117, 0.3), global_x+22.5, global_y+0.5, global_z+10);
+  buildTvScreen(gl, u_ModelMatrix, u_NormalMatrix, initVertexBuffers(gl, 77/11, 40/117, 0.3), global_x+22.5, global_y+0.5, global_z+10);
 
-  buildTable(gl, u_ModelMatrix, u_NormalMatrix, initVertexBuffers(gl, 77/117, 40/117, 0.3), 1, 1, 16);
+  buildTable(gl, u_ModelMatrix, u_NormalMatrix, initVertexBuffers(gl, 77/117, 40/117, 0.3), global_x+1, global_y+1, global_z+16);
   
-  buildLamp(gl, u_ModelMatrix, u_NormalMatrix, initVertexBuffers(gl, 77/117, 40/117, 0.3), 23, 0, 2);
-  buildLamp(gl, u_ModelMatrix, u_NormalMatrix, initVertexBuffers(gl, 77/117, 40/117, 0.3), 23, 0, 22);
+  buildLamp(gl, u_ModelMatrix, u_NormalMatrix, initVertexBuffers(gl, 77/117, 40/117, 0.3), global_x+23, global_y+0, global_z+2);
+  buildLamp(gl, u_ModelMatrix, u_NormalMatrix, initVertexBuffers(gl, 77/117, 40/117, 0.3), global_x+23, global_y+0, global_z+22);
   
-  buildTvStand(gl, u_ModelMatrix, u_NormalMatrix, initVertexBuffers(gl, 77/11, 40/117, 0.3), 21.5, 0, 8);
+  buildTvStand(gl, u_ModelMatrix, u_NormalMatrix, initVertexBuffers(gl, 77/11, 40/117, 0.3), global_x+21.5, global_y+0, global_z+8);
 
-  buildSofa(gl, u_ModelMatrix, u_NormalMatrix, initVertexBuffers(gl, 77/11, 40/117, 0.3), 13, 0, 9);
-  buildPouffe(gl, u_ModelMatrix, u_NormalMatrix, initVertexBuffers(gl, 77/11, 40/117, 0.3), 17, 0, 18);
+  buildSofa(gl, u_ModelMatrix, u_NormalMatrix, initVertexBuffers(gl, 77/11, 40/117, 0.3), global_x+13, global_y+0, global_z+9);
+  buildPouffe(gl, u_ModelMatrix, u_NormalMatrix, initVertexBuffers(gl, 77/11, 40/117, 0.3), global_x+17, global_y+0, global_z+18);
  
-  buildFloor(gl, u_ModelMatrix, u_NormalMatrix, initVertexBuffers(gl, 1, 1, 1));
+  buildFloor(gl, u_ModelMatrix, u_NormalMatrix, initVertexBuffers(gl, 1, 1, 1), global_x, global_y, global_z);
 }
