@@ -91,6 +91,7 @@ var u_isLighting;
 var a_Position;
 
 var chairPos = 13;
+var pouffePos = 18;
 var platePresent = false;
 var screenOn = false;
 
@@ -261,7 +262,7 @@ function keydown(ev, gl, u_ViewMatrix) {
         case 88: //d(backwards)
             a3_View += 0.25
             break;
-        case 67: //c (animate chair)
+        case 67: //c (animate chair and plate & cutlery)
             if(chairPos != 11) {
               platePresent = true;
               while(chairPos != 11){
@@ -281,6 +282,19 @@ function keydown(ev, gl, u_ViewMatrix) {
             screenOn = !screenOn;
             buildScene(gl, u_ModelMatrix, u_NormalMatrix, u_isLighting, global_x, global_y, global_z);
             break;
+        case 80: //p (animate Pouffe)
+          if(pouffePos != 18) {
+            while(pouffePos != 18){
+              pouffePos += 1;
+              buildScene(gl, u_ModelMatrix, u_NormalMatrix, u_isLighting, global_x, global_y, global_z);
+            }
+          } 
+          else {
+            while(pouffePos != 9){
+              pouffePos -= 1;
+              buildScene(gl, u_ModelMatrix, u_NormalMatrix, u_isLighting, global_x, global_y, global_z);
+            }
+          }
         default: return;
     }
     viewMatrix.setLookAt(a1_View, a2_View, a3_View, b1_View, b2_View, b3_View, c1_View, c2_View, c3_View);
@@ -892,7 +906,7 @@ function buildScene(gl, u_ModelMatrix, u_NormalMatrix, u_isLighting, global_x, g
   buildTvStand(gl, u_ModelMatrix, u_NormalMatrix, initVertexBuffers(gl, 77/11, 40/117, 0.3), global_x+21.5, global_y+0, global_z+8);
 
   buildSofa(gl, u_ModelMatrix, u_NormalMatrix, initVertexBuffers(gl, 77/11, 40/117, 0.3), global_x+13, global_y+0, global_z+9);
-  buildPouffe(gl, u_ModelMatrix, u_NormalMatrix, initVertexBuffers(gl, 77/11, 40/117, 0.3), global_x+17, global_y+0, global_z+18);
+  buildPouffe(gl, u_ModelMatrix, u_NormalMatrix, initVertexBuffers(gl, 77/11, 40/117, 0.3), global_x+17, global_y+0, global_z+pouffePos);
  
   buildFloor(gl, u_ModelMatrix, u_NormalMatrix, initVertexBuffers(gl, 1, 1, 1), global_x, global_y, global_z);
 }
