@@ -82,11 +82,7 @@ var u_LightDirection;
 var u_LightPosition;
 var u_Sampler;
 var u_UseTextures;
-
 var u_isLighting;
-
-var loaded;
-var texture;
 
 var a_Position;
 
@@ -157,6 +153,8 @@ function main() {
     img5 = new Image();
     img6 = new Image();
     img7 = new Image();
+    img8 = new Image();
+    img9 = new Image();
 
     //Floor Texture
     img1.src = "originalsquarewood.png";
@@ -179,6 +177,12 @@ function main() {
     //Chair Texture
     img7.src = "woodboard_256x256.jpg"
 
+    //Lamp Stand
+    img8.src = "metal2_256x256.jpg"
+
+    //Lamp Head
+    img9.src = "beige_256x256.jpg"
+
     images.push(img1);
     images.push(img2);
     images.push(img3);
@@ -186,10 +190,10 @@ function main() {
     images.push(img5);
     images.push(img6);
     images.push(img7);
+    images.push(img8);
+    images.push(img9);
 
-    console.log(images);
-
-    img7.onload = function() {initTexture(gl, u_Sampler, u_UseTextures, images);};   
+    img9.onload = function() {initTexture(gl, u_Sampler, u_UseTextures, images);};   
 
     requestAnimationFrame(update);
 };
@@ -428,9 +432,6 @@ function draw(gl, u_ModelMatrix, u_NormalMatrix, u_isLighting) {
   modelMatrix.rotate(g_yAngle, 0, 1, 0); 
   modelMatrix.rotate(g_xAngle, 1, 0, 0);
 
-  console.log("here");
-
-  initTexture(gl, u_Sampler, u_UseTextures, images);
   buildScene(gl, u_ModelMatrix, u_NormalMatrix, u_isLighting);
 
   // try {
@@ -470,8 +471,6 @@ function drawbox(gl, u_ModelMatrix, u_NormalMatrix, n) {
 
 function initTexture(gl, u_Sampler, u_UseTextures, images){
 
-  console.log("calling initTextures");
-
   for(i=0; i<images.length; i++) {
     var texture = gl.createTexture();
 
@@ -501,10 +500,11 @@ function initTexture(gl, u_Sampler, u_UseTextures, images){
 
     textures.push(texture);
   }
-  console.log(textures)
 }
 
 function buildChair(gl, u_ModelMatrix, u_NormalMatrix, n, translate_x, translate_y, translate_z, face) {
+  gl.bindTexture(gl.TEXTURE_2D, textures[6]);
+
   pushMatrix(modelMatrix);
   modelMatrix.translate(translate_x, translate_y, translate_z);
   modelMatrix.scale(2.0, 0.5, 2.0); 
@@ -593,6 +593,7 @@ function buildTable(gl, u_ModelMatrix, u_NormalMatrix, n, translate_x, translate
 }
 
 function buildLamp(gl, u_ModelMatrix, u_NormalMatrix, n, translate_x, translate_y, translate_z, face) {  
+  gl.bindTexture(gl.TEXTURE_2D, textures[7]);
   pushMatrix(modelMatrix);
   modelMatrix.translate(translate_x-0.75, translate_y-2, translate_z-0.75);
   modelMatrix.scale(2.0, 1, 2.0); 
@@ -604,6 +605,8 @@ function buildLamp(gl, u_ModelMatrix, u_NormalMatrix, n, translate_x, translate_
   modelMatrix.scale(0.5, 8.0, 0.5);
   drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
   modelMatrix = popMatrix();
+
+  gl.bindTexture(gl.TEXTURE_2D, textures[8]);
 
   pushMatrix(modelMatrix);
   modelMatrix.translate(translate_x-0.75, translate_y+5, translate_z-0.75);  
