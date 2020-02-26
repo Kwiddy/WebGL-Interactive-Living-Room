@@ -87,7 +87,6 @@ var u_isLighting;
 
 var loaded;
 var texture;
-var img1;
 
 var a_Position;
 
@@ -154,32 +153,43 @@ function main() {
     img1 = new Image();
     img2 = new Image();
     img3 = new Image();
+    img4 = new Image();
+    img5 = new Image();
+    img6 = new Image();
+    img7 = new Image();
 
+    //Floor Texture
     img1.src = "originalsquarewood.png";
+    
+    //Table Texture
     img2.src = "verticalplanks_256x256.jpg";
-    img3.src = "carpet2_256x256.jpg";
+    
+    //Sofa and Pouffe Texture
+    img3.src = "dbrownleather2_256x256.jpg";
+    
+    //TV Stand Texture
+    img4.src = "rustywoodplanks_256x256.jpg";
+
+    //TV Texture
+    img5.src = "riskyglass.jpg"
+
+    //TV Screen texture
+    img6.src = "static_256x256.jpg"
+
+    //Chair Texture
+    img7.src = "woodboard_256x256.jpg"
 
     images.push(img1);
     images.push(img2);
     images.push(img3);
+    images.push(img4);
+    images.push(img5);
+    images.push(img6);
+    images.push(img7);
 
     console.log(images);
 
-    // img1.src = "originalsquarewood.png";
-    // img1.src = "wood.png";
-    //img1.src = "carpet.jpg";
-    //img1.src = "squarewood.jpg"
-    // img1.src = "carpet2_256x256.jpg";
-    //  img1.src = "wood3_256x256.jpg";
-    // img1.src = "verticalplanks_256x256.jpg";
-    // img1.src = "verticalplanks2_256x256.jpg";
-    // img1.src = "darkwoodplanks_256x256.jpg";
-    //  img1.src = "woodplank3_256x256.jpg";
-    // img1.src = "darkwoodplank2_256x256.jpg";
-    // img1.src = "rustywoodplanks_256x256.jpg";
-    // img1.src = "rustyplank2_256x256.jpg";
-
-    img3.onload = function() {initTexture(gl, u_Sampler, u_UseTextures, images);};   
+    img7.onload = function() {initTexture(gl, u_Sampler, u_UseTextures, images);};   
 
     requestAnimationFrame(update);
 };
@@ -603,6 +613,7 @@ function buildLamp(gl, u_ModelMatrix, u_NormalMatrix, n, translate_x, translate_
 }
 
 function buildTvStand(gl, u_ModelMatrix, u_NormalMatrix, n, translate_x, translate_y, translate_z, face) {
+  gl.bindTexture(gl.TEXTURE_2D, textures[3]);
   pushMatrix(modelMatrix);
   modelMatrix.translate(translate_x, translate_y, translate_z);
   modelMatrix.scale(3.0, 0.5, 10.0); 
@@ -617,6 +628,7 @@ function buildTvStand(gl, u_ModelMatrix, u_NormalMatrix, n, translate_x, transla
 }
 
 function buildTv(gl, u_ModelMatrix, u_NormalMatrix, n, translate_x, translate_y, translate_z, face) {
+  gl.bindTexture(gl.TEXTURE_2D, textures[4]);
   pushMatrix(modelMatrix);
   modelMatrix.translate(translate_x, translate_y, translate_z);
   modelMatrix.scale(1.0, 0.3, 6.0); 
@@ -668,6 +680,16 @@ function buildTv(gl, u_ModelMatrix, u_NormalMatrix, n, translate_x, translate_y,
 
 }
 
+function buildTvScreen(gl, u_ModelMatrix, u_NormalMatrix, n, translate_x, translate_y, translate_z, face) {
+  gl.bindTexture(gl.TEXTURE_2D, textures[5]);
+  pushMatrix(modelMatrix);
+  modelMatrix.translate(translate_x+0.12, translate_y+1.4, translate_z-2.5);
+  modelMatrix.scale(0.05, 4.0, 11.0); 
+  drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
+  modelMatrix = popMatrix();
+
+}
+
 function buildPouffe(gl, u_ModelMatrix, u_NormalMatrix, n, translate_x, translate_y, translate_z, face) {
   pushMatrix(modelMatrix);
   modelMatrix.translate(translate_x, translate_y-1.5, translate_z-1);  
@@ -707,6 +729,7 @@ function buildPouffe(gl, u_ModelMatrix, u_NormalMatrix, n, translate_x, translat
 }
 
 function buildSofa(gl, u_ModelMatrix, u_NormalMatrix, n, translate_x, translate_y, translate_z, face) {
+  gl.bindTexture(gl.TEXTURE_2D, textures[2]);
   pushMatrix(modelMatrix);
   modelMatrix.translate(translate_x, translate_y-1.5, translate_z-1);  
   modelMatrix.scale(3.0, 1.25, 12);
@@ -787,6 +810,7 @@ function buildScene(gl, u_ModelMatrix, u_NormalMatrix, u_isLighting) {
   buildChair(gl, u_ModelMatrix, u_NormalMatrix, initVertexBuffers(gl, 0.55, 0.35, 0.1), 5, 0, 22, "near");
 
   buildTv(gl, u_ModelMatrix, u_NormalMatrix, initVertexBuffers(gl, 77/11, 40/117, 0.3), 22.5, 0.5, 10);
+  buildTvScreen(gl, u_ModelMatrix, u_NormalMatrix, initVertexBuffers(gl, 77/11, 40/117, 0.3), 22.5, 0.5, 10);
 
   buildTable(gl, u_ModelMatrix, u_NormalMatrix, initVertexBuffers(gl, 77/117, 40/117, 0.3), 1, 1, 16);
   
