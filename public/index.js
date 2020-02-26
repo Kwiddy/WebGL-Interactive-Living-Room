@@ -86,6 +86,9 @@ var u_isLighting;
 
 var a_Position;
 
+var chairPos = 13;
+var screenOn = false;
+
 function main() {
 
     var canvas = document.getElementById('webgl');
@@ -155,6 +158,7 @@ function main() {
     img7 = new Image();
     img8 = new Image();
     img9 = new Image();
+    img10 = new Image();
 
     //Floor Texture
     img1.src = "originalsquarewood.png";
@@ -171,7 +175,7 @@ function main() {
     //TV Texture
     img5.src = "riskyglass.jpg"
 
-    //TV Screen texture
+    //TV Screen texture (Off)
     img6.src = "static_256x256.jpg"
 
     //Chair Texture
@@ -183,6 +187,9 @@ function main() {
     //Lamp Head
     img9.src = "beige_256x256.jpg"
 
+    //TV Screen Texture (On)
+    img10.src = "blue_256x256.jpg"
+
     images.push(img1);
     images.push(img2);
     images.push(img3);
@@ -192,8 +199,9 @@ function main() {
     images.push(img7);
     images.push(img8);
     images.push(img9);
+    images.push(img10);
 
-    img9.onload = function() {initTexture(gl, u_Sampler, u_UseTextures, images);};   
+    img10.onload = function() {initTexture(gl, u_Sampler, u_UseTextures, images);};   
 
     requestAnimationFrame(update);
 };
@@ -237,12 +245,22 @@ function keydown(ev, gl, u_ViewMatrix) {
         case 68: //d(right)
             a1_View -= 0.25;
             break;
-        case 90: //Z(forwards)
+        case 90: //z(forwards)
             a3_View -= 0.25
             break;
         case 88: //d(backwards)
             a3_View += 0.25
             break;
+        case 67: //c (animate chair)
+            chairPos -= 0.25;
+            buildScene(gl, u_ModelMatrix, u_NormalMatrix, u_isLighting);
+        case 84:
+            if(screenOn) {
+              screenOn = false;
+            } else {
+              screenOn = true;
+            }
+            buildScene(gl, u_ModelMatrix, u_NormalMatrix, u_isLighting);
         default: return;
     }
     viewMatrix.setLookAt(a1_View, a2_View, a3_View, b1_View, b2_View, b3_View, c1_View, c2_View, c3_View);
@@ -684,7 +702,11 @@ function buildTv(gl, u_ModelMatrix, u_NormalMatrix, n, translate_x, translate_y,
 }
 
 function buildTvScreen(gl, u_ModelMatrix, u_NormalMatrix, n, translate_x, translate_y, translate_z, face) {
-  gl.bindTexture(gl.TEXTURE_2D, textures[5]);
+  if(screenOn){
+    gl.bindTexture(gl.TEXTURE_2D, textures[9]);
+  } else {
+    gl.bindTexture(gl.TEXTURE_2D, textures[5]);
+  }
   pushMatrix(modelMatrix);
   modelMatrix.translate(translate_x+0.12, translate_y+1.4, translate_z-2.5);
   modelMatrix.scale(0.05, 4.0, 11.0); 
@@ -808,7 +830,7 @@ function buildSofa(gl, u_ModelMatrix, u_NormalMatrix, n, translate_x, translate_
 
 function buildScene(gl, u_ModelMatrix, u_NormalMatrix, u_isLighting) {
   buildChair(gl, u_ModelMatrix, u_NormalMatrix, initVertexBuffers(gl, 0.55, 0.35, 0.1), 1, 0, 13, "far");
-  buildChair(gl, u_ModelMatrix, u_NormalMatrix, initVertexBuffers(gl, 0.55, 0.35, 0.1), 5, 0, 13, "far");
+  buildChair(gl, u_ModelMatrix, u_NormalMatrix, initVertexBuffers(gl, 0.55, 0.35, 0.1), 5, 0, chairPos, "far");
   buildChair(gl, u_ModelMatrix, u_NormalMatrix, initVertexBuffers(gl, 0.55, 0.35, 0.1), 1, 0, 22, "near");
   buildChair(gl, u_ModelMatrix, u_NormalMatrix, initVertexBuffers(gl, 0.55, 0.35, 0.1), 5, 0, 22, "near");
 
