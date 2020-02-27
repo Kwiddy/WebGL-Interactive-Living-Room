@@ -6,16 +6,44 @@
     </head>
 
     <body onload="main()">
-        <canvas id="webgl" width="400" height="400">
-            Please use a browser that supports "canvas"
-        </canvas>
-        <p> 
-            <b>ARROW KEYS:</b> use the arrow keys to rotate the scene
-            <br>
-            <b>WASD KEYS:</b> use the WASD keys to move around the scene
-            <br>
-            <b>Z/X KEYS:</b> use Z to zoom in and X to zoom out
-        </p>
+        <table style="width:100%">
+            <tr>
+                <tr>
+                    <td>
+                        <canvas id="webgl" width="400" height="400">
+                            Please use a browser that supports "canvas"
+                        </canvas>
+                    </td>
+                    <td><p> 
+                        <b>Camera Movement: </b>
+                        <ul>
+                            <li><b>Arrow Keys: </b> use the arrow keys to rotate the camera</li>
+                            <li><b>WASD Keys: </b> use the WASD keys to move the camera around the scene</li>
+                            <li><b>Z/X Keys: </b> use the Z and X Keys to zoom in and out of the scene</li>
+                        </ul>
+                        <b>Animations: </b>
+                        <ul>
+                            <li><b>C: </b> Use the C key to set the table, this pulls out four chairs and builds four plate objects</li>
+                            <li><b>P: </b> Use the P key to move the pouffe to the other side of the sofa </li>
+                            <li><b>T: </b> Use the T key to turn on the TV</li>
+                        </ul>
+                        <b>Objects </b><i>(x15 Total, inc. 10 Animated)</i><b>: </b>
+                        <ul>
+                            <li>1x Table</li>
+                            <li>4x Chairs</li>
+                            <li>1x Sofa</li>
+                            <li>2x Lamps</li>
+                            <li>1x Pouffe</li>
+                            <li>1x TV</li>
+                            <li>1x TV Stand</li>
+                            <li>4x Plates & Cutlery </li>
+                        </ul>
+            
+            
+                    </p></td>
+                </tr>
+            </tr>
+        </table>
 
         <script src="./lib/webgl-utils.js"></script>
         <script src="./lib/webgl-debug.js"></script>
