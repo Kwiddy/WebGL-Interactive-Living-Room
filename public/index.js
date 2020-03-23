@@ -121,6 +121,14 @@ var pouffeTowards = false;
 
 var tvBounce = false;
 var TVPos = 0;
+var remotePos_x = 0;
+var remoteOut = true;
+var moveRemote = false;
+var remoteCount = 0;
+var rotateRem_y = 0;
+var rotateRem_z = 0;
+var rotatingRem = false;
+var rotateDone = false;
 var TVUp = 1;
 var screenOn = false;
 
@@ -314,19 +322,55 @@ function movePouffe() {
 }
 
 function tvbop() {
-  if(tvBounce) {
-    if(TVUp == 1) {
-      if(TVPos != 0.75) {
-        TVPos += 0.25;
-      } else {
-        TVUp = -1;
+  if(moveRemote) {
+    if(rotatingRem){
+      rotateRem_y = (rotateRem_y + Math.PI/100) % 2*Math.PI;
+      rotateRem_z = (rotateRem_y + Math.PI/100) % 2*Math.PI;
+      remoteCount += 1;
+      console.log(remoteCount);
+
+      if(remoteCount % 10 == 0){
+        rotateRem_z = 0;
+        rotateRem_y = 0;
+        console.log("Limit reached")
+        remoteOut = false;
+        rotatingRem = false;
+        rotateDone = true;
       }
     } else {
-      if(TVPos != 0) {
-        TVPos -= 0.25;
+      if (remoteOut){
+        if(remotePos_x > -5) {
+          remotePos_x -= 0.5;
+        } else {
+          rotatingRem = true;
+        }
       } else {
-        TVUp = 1;
-        tvBounce = !tvBounce;
+        if(remotePos_x < 0) {
+          remotePos_x += 0.5;
+        } else {
+          remoteOut = true;
+          moveRemote = !moveRemote;
+        }
+      }
+    }
+  }
+
+  if(rotateDone){
+    if(tvBounce) {
+      if(TVUp == 1) {
+        if(TVPos != 0.75) {
+          TVPos += 0.25;
+        } else {
+          TVUp = -1;
+        }
+      } else {
+        if(TVPos != 0) {
+          TVPos -= 0.25;
+        } else {
+          TVUp = 1;
+          tvBounce = !tvBounce;
+          rotateDone = false;
+        }
       }
     }
   }
@@ -393,6 +437,7 @@ function keydown(ev, gl, u_ViewMatrix) {
         case 84: //t (animate TV)
             screenOn = !screenOn;
             tvBounce = true;
+            moveRemote = true;
             break;
         case 80: //p (animate Pouffe)
         if(pouffePos == 18) {
@@ -565,7 +610,15 @@ function initAxesVertexBuffers(gl) {
   
     return n;
 }
-  
+
+function sleep(ms) {
+  const date = Date.now();
+  let currentDate = null;
+  do {
+    currentDate = Date.now();
+  } while (currentDate - date < ms);
+}
+
 function pushMatrix(m) { 
   var m2 = new Matrix4(m);
   g_matrixStack.push(m2);
@@ -1031,7 +1084,7 @@ function buildScene(gl, u_ModelMatrix, u_NormalMatrix, u_isLighting, global_x, g
 
   buildTv(gl, u_ModelMatrix, u_NormalMatrix, initVertexBuffers(gl, 77/11, 40/117, 0.3), global_x+22.5, global_y+TVPos+0.5, global_z+10);
   buildTvScreen(gl, u_ModelMatrix, u_NormalMatrix, initVertexBuffers(gl, 77/11, 40/117, 0.3), global_x+22.5, global_y+TVPos+0.5, global_z+10);
-  buildRemote(gl, u_ModelMatrix, u_NormalMatrix, initVertexBuffers(gl, 77/11, 40/117, 0.3), global_x+22, global_y+2, global_z+17.5);
+  buildRemote(gl, u_ModelMatrix, u_NormalMatrix, initVertexBuffers(gl, 77/11, 40/117, 0.3), global_x+22+remotePos_x, global_y+2+Math.sin(rotateRem_y), global_z+17.5+Math.sin(rotateRem_z));
 
   buildTable(gl, u_ModelMatrix, u_NormalMatrix, initVertexBuffers(gl, 77/117, 40/117, 0.3), global_x+1, global_y+1, global_z+16);
   if(platePresent){
