@@ -9,16 +9,19 @@ var VSHADER_SOURCE =
   'uniform mat4 u_ProjMatrix;\n' +
   'uniform vec3 u_LightColor;\n' +     
   'uniform vec3 u_AmbientLight;\n' +
-  //'uniform vec3 u_Sampler;\n' +
   'uniform vec3 u_UseTextures;\n' +
   'uniform vec3 u_LightDirection;\n' + 
   'uniform vec3 u_LightPosition;\n' +
   'uniform bool u_isLighting;\n' +
   'varying vec4 v_Color;\n' +
+  'varying vec3 v_Normal;\n' +
+  'varying vec3 v_Position;\n' +
   'varying vec2 v_TexCoord;\n' +
   'void main() {\n' +
   '  gl_Position = u_ProjMatrix * u_ViewMatrix * u_ModelMatrix * a_Position;\n' +
   '  v_TexCoord = a_TexCoord;\n' +
+  '  v_Position = vec3(u_ModelMatrix * a_Position);\n' +
+  '  v_Normal = normalize(vec3(u_NormalMatrix * a_Normal));\n' +
   '  if(u_isLighting)\n' + 
   '  {\n' +
   '     vec4 vertexPosition = u_ModelMatrix * a_Position;\n' +
@@ -40,9 +43,19 @@ var VSHADER_SOURCE =
   'precision mediump float;\n' +
   '#endif\n' +
   'uniform sampler2D u_Sampler;\n' +
+  'uniform vec3 u_lightColor;\n' +
+  'uniform vec3 u_lightPosition;\n' +
+  'uniform vec3 u_ambientLight;\n' +
+  'varying vec3 v_Normal;\n' +
+  'varying vec3 v_Position;\n' +
   'varying vec4 v_Color;\n' +
   'varying vec2 v_TexCoord;\n' +
   'void main() {\n' +
+  '  vec3 normal = normalize(v_Normal);\n' +
+  '  vec3 lightDirection = normalize(u_lightPosition - v_Position);\n' +
+  '  float nDotL = max(dot(lightDirection, normal), 0.0);\n' +
+  '  vec3 diffuse = u_lightColor * v_Color.rgb * nDotL;\n' +
+  '  vec3 ambient = u_ambientLight * v_Color.rgb;\n' +
   '  gl_FragColor = texture2D(u_Sampler, v_TexCoord);\n' +
   '}\n';
 
@@ -69,7 +82,7 @@ var c1_View = 0;
 var c2_View = 1;
 var c3_View = 0;
 
-var ANGLE_STEP = 2.0;
+var ANGLE_STEP = 1.0;
 var g_xAngle = 10.0;//10.0;
 var g_yAngle = 0.0;
 
@@ -89,6 +102,9 @@ var u_UseTextures;
 var u_isLighting;
 
 var a_Position;
+
+var u_lightPosition = [0,0,0];
+var u_lightColor = [0,0,0];
 
 var chairPos1 = 13;
 var chairPos2 = 22;
@@ -166,7 +182,7 @@ function main() {
         keydown(ev, gl, u_ViewMatrix);
     };
 
-    //var n = initVertexBuffers(gl, 0.55, 0.35, 0.1);
+    // var n = initVertexBuffers(gl, 0.55, 0.35, 0.1);
 
     img1 = new Image();
     img2 = new Image();
@@ -179,39 +195,43 @@ function main() {
     img9 = new Image();
     img10 = new Image();
     img11 = new Image();
+    img12 = new Image();
 
     //Floor Texture
-    img1.src = "originalsquarewood.png";
+    img1.src = "textures/originalsquarewood.png";
     
     //Table Texture
-    img2.src = "verticalplanks_256x256.jpg";
+    img2.src = "textures/verticalplanks_256x256.jpg";
     
     //Sofa and Pouffe Texture
-    img3.src = "dbrownleather2_256x256.jpg";
+    img3.src = "textures/dbrownleather2_256x256.jpg";
     
     //TV Stand Texture
-    img4.src = "rustywoodplanks_256x256.jpg";
+    img4.src = "textures/rustywoodplanks_256x256.jpg";
 
     //TV Texture
-    img5.src = "riskyglass.jpg"
+    img5.src = "textures/riskyglass.jpg"
 
     //TV Screen texture (Off)
-    img6.src = "static_256x256.jpg"
+    img6.src = "textures/static_256x256.jpg"
 
     //Chair Texture
-    img7.src = "woodboard_256x256.jpg"
+    img7.src = "textures/woodboard_256x256.jpg"
 
     //Lamp Stand and cutlery
-    img8.src = "metal2_256x256.jpg"
+    img8.src = "textures/metal2_256x256.jpg"
 
     //Lamp Head
-    img9.src = "beige_256x256.jpg"
+    img9.src = "textures/beige_256x256.jpg"
 
     //TV Screen Texture (On)
-    img10.src = "blue_256x256.jpg"
+    img10.src = "textures/blue_256x256.jpg"
 
     //Plate white and cup white
-    img11.src = "white_256x256.jpg"
+    img11.src = "textures/white_256x256.jpg"
+
+    //Remote buttons
+    img12.src = "textures/red_256x256.png"
 
     images.push(img1);
     images.push(img2);
@@ -224,13 +244,15 @@ function main() {
     images.push(img9);
     images.push(img10);
     images.push(img11);
+    images.push(img12);
 
-    img11.onload = function() {initTexture(gl, u_Sampler, u_UseTextures, images);}; 
+    img12.onload = function() {initTexture(gl, u_Sampler, u_UseTextures, images);}; 
     
     requestAnimationFrame(update);
 };
 
 function update() {
+  //Animations
   dinnertime();
   movePouffe();
   tvbop();
@@ -333,22 +355,22 @@ function keydown(ev, gl, u_ViewMatrix) {
             g_yAngle = (g_yAngle + ANGLE_STEP) % 360;
             break;
         case 65: //a(left)
-            a1_View += 0.25
+            a1_View += 0.2
             break;
         case 87: //w(up)
-            a2_View -= 0.25
+            a2_View -= 0.2
             break;
         case 83: //s(down)
-            a2_View += 0.25
+            a2_View += 0.2
             break;
         case 68: //d(right)
-            a1_View -= 0.25;
+            a1_View -= 0.2;
             break;
         case 90: //z(forwards)
-            a3_View -= 0.25;
+            a3_View -= 0.2;
             break;
         case 88: //d(backwards)
-            a3_View += 0.25;
+            a3_View += 0.2;
             break;
         case 67: //c (animate chair and plate & cutlery)
             if(chairPos1 == 13) {
@@ -380,12 +402,13 @@ function keydown(ev, gl, u_ViewMatrix) {
           pouffeTowards = true;
           }
         break;
-          break;
-        default: return;
+      default: return;
     }
     viewMatrix.setLookAt(a1_View, a2_View, a3_View, b1_View, b2_View, b3_View, c1_View, c2_View, c3_View);
-    gl.uniformMatrix4fv(u_ViewMatrix, false, viewMatrix.elements);
-}
+    viewMatrix.rotate(g_yAngle, 0, 1, 0); 
+    viewMatrix.rotate(g_xAngle, 1, 0, 0);  
+    gl.uniformMatrix4fv(u_ViewMatrix, false, viewMatrix.elements); 
+  }
 
 function initVertexBuffers(gl, rVal, gVal, bVal) {
     var vertices = new Float32Array([   
@@ -566,9 +589,10 @@ function draw(gl, u_ModelMatrix, u_NormalMatrix, u_isLighting) {
   
   gl.uniform1i(u_isLighting, true); 
 
-  modelMatrix.setTranslate(0, 0, 0);  
-  modelMatrix.rotate(g_yAngle, 0, 1, 0); 
-  modelMatrix.rotate(g_xAngle, 1, 0, 0);
+  //modelMatrix.setTranslate(0, 0, 0);
+
+  // modelMatrix.rotate(g_yAngle, 0, 1, 0); 
+  // modelMatrix.rotate(g_xAngle, 1, 0, 0);
 
   buildScene(gl, u_ModelMatrix, u_NormalMatrix, u_isLighting, global_x, global_y, global_z);
 
@@ -707,25 +731,25 @@ function buildTable(gl, u_ModelMatrix, u_NormalMatrix, n, translate_x, translate
 
   pushMatrix(modelMatrix);
   modelMatrix.translate(translate_x+0.5, translate_y-3, translate_z+0.5);  
-  modelMatrix.scale(0.5, 3.5, 0.5);
+  modelMatrix.scale(0.5, 3.4, 0.5);
   drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
   modelMatrix = popMatrix();
 
   pushMatrix(modelMatrix);
   modelMatrix.translate(translate_x+0.5, translate_y-3, translate_z+4);  
-  modelMatrix.scale(0.5, 3.5, 0.5);
+  modelMatrix.scale(0.5, 3.4, 0.5);
   drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
   modelMatrix = popMatrix();
 
   pushMatrix(modelMatrix);
   modelMatrix.translate(translate_x+5.5, translate_y-3, translate_z+0.5);  
-  modelMatrix.scale(0.5, 3.5, 0.5);
+  modelMatrix.scale(0.5, 3.4, 0.5);
   drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
   modelMatrix = popMatrix();
 
   pushMatrix(modelMatrix);
   modelMatrix.translate(translate_x+5.5, translate_y-3, translate_z+4);  
-  modelMatrix.scale(0.5, 3.5, 0.5);
+  modelMatrix.scale(0.5, 3.4, 0.5);
   drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
   modelMatrix = popMatrix();
 }
@@ -833,6 +857,33 @@ function buildTvScreen(gl, u_ModelMatrix, u_NormalMatrix, n, translate_x, transl
   drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
   modelMatrix = popMatrix();
 
+}
+
+function buildRemote(gl, u_ModelMatrix, u_NormalMatrix, n, translate_x, translate_y, translate_z) {
+  gl.bindTexture(gl.TEXTURE_2D, textures[4]);
+  pushMatrix(modelMatrix);
+  modelMatrix.translate(translate_x, translate_y-1.5, translate_z-1);  
+  modelMatrix.scale(1.5, 0.5, 0.8);
+  drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
+  modelMatrix = popMatrix();
+
+  buildButton(gl, u_ModelMatrix, u_NormalMatrix, n, translate_x+0.1, translate_y+0.5, translate_z+0.08)
+  buildButton(gl, u_ModelMatrix, u_NormalMatrix, n, translate_x+1.2, translate_y+0.5, translate_z+0.08)
+  buildButton(gl, u_ModelMatrix, u_NormalMatrix, n, translate_x+0.46, translate_y+0.5, translate_z+0.08)
+  buildButton(gl, u_ModelMatrix, u_NormalMatrix, n, translate_x+0.82, translate_y+0.5, translate_z+0.08)
+  buildButton(gl, u_ModelMatrix, u_NormalMatrix, n, translate_x+0.1, translate_y+0.5, translate_z+0.5)
+  buildButton(gl, u_ModelMatrix, u_NormalMatrix, n, translate_x+1.2, translate_y+0.5, translate_z+0.5)
+  buildButton(gl, u_ModelMatrix, u_NormalMatrix, n, translate_x+0.46, translate_y+0.5, translate_z+0.5)
+  buildButton(gl, u_ModelMatrix, u_NormalMatrix, n, translate_x+0.82, translate_y+0.5, translate_z+0.5)
+}
+
+function buildButton(gl, u_ModelMatrix, u_NormalMatrix, n, translate_x, translate_y, translate_z) {
+  gl.bindTexture(gl.TEXTURE_2D, textures[11]);
+  pushMatrix(modelMatrix);
+  modelMatrix.translate(translate_x, translate_y-1.5, translate_z-1);  
+  modelMatrix.scale(0.2, 0.05, 0.2);
+  drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
+  modelMatrix = popMatrix();
 }
 
 function buildPouffe(gl, u_ModelMatrix, u_NormalMatrix, n, translate_x, translate_y, translate_z) {
@@ -980,6 +1031,7 @@ function buildScene(gl, u_ModelMatrix, u_NormalMatrix, u_isLighting, global_x, g
 
   buildTv(gl, u_ModelMatrix, u_NormalMatrix, initVertexBuffers(gl, 77/11, 40/117, 0.3), global_x+22.5, global_y+TVPos+0.5, global_z+10);
   buildTvScreen(gl, u_ModelMatrix, u_NormalMatrix, initVertexBuffers(gl, 77/11, 40/117, 0.3), global_x+22.5, global_y+TVPos+0.5, global_z+10);
+  buildRemote(gl, u_ModelMatrix, u_NormalMatrix, initVertexBuffers(gl, 77/11, 40/117, 0.3), global_x+22, global_y+2, global_z+17.5);
 
   buildTable(gl, u_ModelMatrix, u_NormalMatrix, initVertexBuffers(gl, 77/117, 40/117, 0.3), global_x+1, global_y+1, global_z+16);
   if(platePresent){
