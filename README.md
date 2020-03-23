@@ -5,3 +5,7 @@ https://webglfundamentals.org/webgl/lessons/webgl-cors-permission.html
 
 Animation:
 https://developer.mozilla.org/en-US/docs/Web/API/WebGL_API/Basic_2D_animation_example 
+
+
+npm start
+localhost 8888
