@@ -322,20 +322,24 @@ function movePouffe() {
 }
 
 function tvbop() {
+  var rotateLim = 10; 
+
   if(moveRemote) {
     if(rotatingRem){
-      rotateRem_y = (rotateRem_y + Math.PI/100) % 2*Math.PI;
-      rotateRem_z = (rotateRem_y + Math.PI/100) % 2*Math.PI;
+      rotateRem_y = (rotateRem_y + Math.PI/1000) % 2*Math.PI;
+      rotateRem_z = (rotateRem_y + Math.PI/1000) % 2*Math.PI;
       remoteCount += 1;
-      console.log(remoteCount);
 
-      if(remoteCount % 10 == 0){
+      if(remoteCount % (rotateLim/2) == 0) {
+        rotateDone = true;
+      }
+
+      if(remoteCount % rotateLim == 0){
         rotateRem_z = 0;
         rotateRem_y = 0;
-        console.log("Limit reached")
         remoteOut = false;
         rotatingRem = false;
-        rotateDone = true;
+        screenOn = !screenOn;
       }
     } else {
       if (remoteOut){
@@ -435,7 +439,6 @@ function keydown(ev, gl, u_ViewMatrix) {
               }
             break;
         case 84: //t (animate TV)
-            screenOn = !screenOn;
             tvBounce = true;
             moveRemote = true;
             break;
@@ -899,6 +902,7 @@ function buildTv(gl, u_ModelMatrix, u_NormalMatrix, n, translate_x, translate_y,
 }
 
 function buildTvScreen(gl, u_ModelMatrix, u_NormalMatrix, n, translate_x, translate_y, translate_z) {
+  console.log(screenOn)
   if(screenOn){
     gl.bindTexture(gl.TEXTURE_2D, textures[9]);
   } else {
