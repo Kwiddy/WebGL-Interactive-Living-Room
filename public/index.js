@@ -322,12 +322,12 @@ function movePouffe() {
 }
 
 function tvbop() {
-  var rotateLim = 10; 
+  var rotateLim = 9; 
 
   if(moveRemote) {
     if(rotatingRem){
-      rotateRem_y = (rotateRem_y + 360/1000) % Math.PI;
-      rotateRem_z = (rotateRem_y + 360/1000) % Math.PI;
+      rotateRem_y = (rotateRem_y + Math.PI/10) % Math.PI;
+      rotateRem_z = (rotateRem_y + Math.PI/10) % Math.PI;
       remoteCount += 1;
 
       if(remoteCount % (rotateLim/2) == 0) {
