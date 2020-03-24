@@ -326,8 +326,8 @@ function tvbop() {
 
   if(moveRemote) {
     if(rotatingRem){
-      rotateRem_y = (rotateRem_y + Math.PI/1000) % 2*Math.PI;
-      rotateRem_z = (rotateRem_y + Math.PI/1000) % 2*Math.PI;
+      rotateRem_y = (rotateRem_y + 360/1000) % Math.PI;
+      rotateRem_z = (rotateRem_y + 360/1000) % Math.PI;
       remoteCount += 1;
 
       if(remoteCount % (rotateLim/2) == 0) {
@@ -899,6 +899,8 @@ function buildTv(gl, u_ModelMatrix, u_NormalMatrix, n, translate_x, translate_y,
   drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
   modelMatrix = popMatrix();
 
+  buildTvScreen(gl, u_ModelMatrix, u_NormalMatrix, initVertexBuffers(gl, 77/11, 40/117, 0.3), translate_x, translate_y, translate_z);
+
 }
 
 function buildTvScreen(gl, u_ModelMatrix, u_NormalMatrix, n, translate_x, translate_y, translate_z) {
@@ -1087,7 +1089,6 @@ function buildScene(gl, u_ModelMatrix, u_NormalMatrix, u_isLighting, global_x, g
   buildChair(gl, u_ModelMatrix, u_NormalMatrix, initVertexBuffers(gl, 0.55, 0.35, 0.1), global_x+5, global_y+0, global_z+chairPos2, "near");
 
   buildTv(gl, u_ModelMatrix, u_NormalMatrix, initVertexBuffers(gl, 77/11, 40/117, 0.3), global_x+22.5, global_y+TVPos+0.5, global_z+10);
-  buildTvScreen(gl, u_ModelMatrix, u_NormalMatrix, initVertexBuffers(gl, 77/11, 40/117, 0.3), global_x+22.5, global_y+TVPos+0.5, global_z+10);
   buildRemote(gl, u_ModelMatrix, u_NormalMatrix, initVertexBuffers(gl, 77/11, 40/117, 0.3), global_x+22+remotePos_x, global_y+2+Math.sin(rotateRem_y), global_z+17.5+Math.sin(rotateRem_z));
 
   buildTable(gl, u_ModelMatrix, u_NormalMatrix, initVertexBuffers(gl, 77/117, 40/117, 0.3), global_x+1, global_y+1, global_z+16);
@@ -1106,5 +1107,5 @@ function buildScene(gl, u_ModelMatrix, u_NormalMatrix, u_isLighting, global_x, g
   buildSofa(gl, u_ModelMatrix, u_NormalMatrix, initVertexBuffers(gl, 77/11, 40/117, 0.3), global_x+13, global_y, global_z+9);
   buildPouffe(gl, u_ModelMatrix, u_NormalMatrix, initVertexBuffers(gl, 77/11, 40/117, 0.3), global_x+17, global_y+0, global_z+pouffePos);
  
-  buildFloor(gl, u_ModelMatrix, u_NormalMatrix, initVertexBuffers(gl, 1, 1, 1), global_x, global_y, global_z);
+  buildFloor(gl, u_ModelMatrix, u_NormalMatrix, initVertexBuffers(gl, 1, 1, 1), global_x, global_y, global_z-2.5);
 }
