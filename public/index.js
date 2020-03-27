@@ -171,7 +171,7 @@ function main() {
     u_UseTextures = gl.getUniformLocation(gl.program, 'u_UseTextures');
     u_isLighting = gl.getUniformLocation(gl.program, 'u_isLighting');
 
-    if (!u_ModelMatrix || !u_ViewMatrix || !u_NormalMatrix || !u_ProjMatrix || !u_LightColor || !u_AmbientLight || !u_LightDirection || !u_isLighting ) { 
+    if (!u_ModelMatrix || !u_ViewMatrix || !u_NormalMatrix || !u_ProjMatrix || !u_LightColor || !u_AmbientLight || !u_LightDirection || !u_isLighting) { 
       console.log('Failed to Get the storage locations of u_ModelMatrix, u_ViewMatrix, and/or u_ProjMatrix');
       return;
     }
@@ -310,13 +310,13 @@ function movePouffe() {
     if(pouffePos == 9){
       pouffeAway = false;
     } else {
-      pouffePos -= 0.25;
+      pouffePos -= 0.5;
     } 
   } else if(pouffeTowards) {
     if(pouffePos == 18){
       pouffeTowards = false;
     } else {
-      pouffePos += 0.25
+      pouffePos += 0.5
     }
   }
 }
@@ -497,7 +497,6 @@ function initVertexBuffers(gl) {
     var n=36;
 
     if (!initArrayBuffer(gl, 'a_Position', vertices, 3, gl.FLOAT)) return -1;
-    // if(!loaded && !initArrayBuffer(gl, 'a_Color', colors, 3, gl.FLOAT)) return -1
     if (!initArrayBuffer(gl, 'a_Normal', normals, 3, gl.FLOAT)) return -1;
 
     var vertexTexCoordBuffer = gl.createBuffer();
@@ -516,8 +515,6 @@ function initVertexBuffers(gl) {
     gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, indices, gl.STATIC_DRAW);
     gl.bindBuffer(gl.ARRAY_BUFFER, vertexTexCoordBuffer);
     gl.bufferData(gl.ARRAY_BUFFER, verticesTexCoords, gl.STATIC_DRAW);
-
-    var FSIZE = verticesTexCoords.BYTES_PER_ELEMENT;
 
     gl.vertexAttribPointer(a_Position, 3, gl.FLOAT, false, 0, 0);
     gl.enableVertexAttribArray(a_Position);
@@ -609,8 +606,6 @@ function popMatrix() {
 function draw(gl, u_ModelMatrix, u_NormalMatrix, u_isLighting) {
 
   gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-
-  gl.uniform1i(u_isLighting, false); 
   
   var n = initAxesVertexBuffers(gl);
   if (n < 0) {
