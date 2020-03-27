@@ -458,7 +458,7 @@ function keydown(ev, gl, u_ViewMatrix) {
     gl.uniformMatrix4fv(u_ViewMatrix, false, viewMatrix.elements); 
   }
 
-function initVertexBuffers(gl, rVal, gVal, bVal) {
+function initVertexBuffers(gl) {
     var vertices = new Float32Array([   
       0.5, 0.5, 0.5,  -0.5, 0.5, 0.5,  -0.5,-0.5, 0.5,   0.5,-0.5, 0.5, 
       0.5, 0.5, 0.5,   0.5,-0.5, 0.5,   0.5,-0.5,-0.5,   0.5, 0.5,-0.5, 
@@ -467,17 +467,6 @@ function initVertexBuffers(gl, rVal, gVal, bVal) {
       -0.5,-0.5,-0.5,   0.5,-0.5,-0.5,   0.5,-0.5, 0.5,  -0.5,-0.5, 0.5, 
       0.5,-0.5,-0.5,  -0.5,-0.5,-0.5,  -0.5, 0.5,-0.5,   0.5, 0.5,-0.5  
     ]);
-  
-    // if(!loaded) {
-    //   var colors = new Float32Array([    
-    //     rVal, gVal, bVal,   rVal, gVal, bVal,   rVal, gVal, bVal,  rVal, gVal, bVal,     
-    //     rVal, gVal, bVal,   rVal, gVal, bVal,   rVal, gVal, bVal,  rVal, gVal, bVal,     
-    //     rVal, gVal, bVal,   rVal, gVal, bVal,   rVal, gVal, bVal,  rVal, gVal, bVal,     
-    //     rVal, gVal, bVal,   rVal, gVal, bVal,   rVal, gVal, bVal,  rVal, gVal, bVal,     
-    //     rVal, gVal, bVal,   rVal, gVal, bVal,   rVal, gVal, bVal,  rVal, gVal, bVal,     
-    //     rVal, gVal, bVal,   rVal, gVal, bVal,   rVal, gVal, bVal,  rVal, gVal, bVal　    
-    //   ]);
-    // }
     
     var normals = new Float32Array([    
       0.0, 0.0, 1.0,   0.0, 0.0, 1.0,   0.0, 0.0, 1.0,   0.0, 0.0, 1.0,  
@@ -504,12 +493,6 @@ function initVertexBuffers(gl, rVal, gVal, bVal) {
       0,1,1,  0, 1,0,  0,0,0,  0,0,1, 
       0,0,0,  1,0,0,   1,0, 1,  0,0,1, 
       1,0,0,  0,0,0,  0, 1,0,   1,1,0
-      // 0.5, 0.5, 0.5,  -0.5, 0.5, 0.5,  -0.5,-0.5, 0.5,   0.5,-0.5, 0.5, 
-      // 0.5, 0.5, 0.5,   0.5,-0.5, 0.5,   0.5,-0.5,-0.5,   0.5, 0.5,-0.5, 
-      // 0.5, 0.5, 0.5,   0.5, 0.5,-0.5,  -0.5, 0.5,-0.5,  -0.5, 0.5, 0.5, 
-      // -0.5, 0.5, 0.5,  -0.5, 0.5,-0.5,  -0.5,-0.5,-0.5,  -0.5,-0.5, 0.5, 
-      // -0.5,-0.5,-0.5,   0.5,-0.5,-0.5,   0.5,-0.5, 0.5,  -0.5,-0.5, 0.5, 
-      // 0.5,-0.5,-0.5,  -0.5,-0.5,-0.5,  -0.5, 0.5,-0.5,   0.5, 0.5,-0.5 
     ]);
     var n=36;
 
@@ -614,14 +597,6 @@ function initAxesVertexBuffers(gl) {
     return n;
 }
 
-function sleep(ms) {
-  const date = Date.now();
-  let currentDate = null;
-  do {
-    currentDate = Date.now();
-  } while (currentDate - date < ms);
-}
-
 function pushMatrix(m) { 
   var m2 = new Matrix4(m);
   g_matrixStack.push(m2);
@@ -645,30 +620,7 @@ function draw(gl, u_ModelMatrix, u_NormalMatrix, u_isLighting) {
   
   gl.uniform1i(u_isLighting, true); 
 
-  //modelMatrix.setTranslate(0, 0, 0);
-
-  // modelMatrix.rotate(g_yAngle, 0, 1, 0); 
-  // modelMatrix.rotate(g_xAngle, 1, 0, 0);
-
-  buildScene(gl, u_ModelMatrix, u_NormalMatrix, u_isLighting, global_x, global_y, global_z);
-
-  // try {
-  //   render(loaded);
-
-  //   function render(loaded) {
-  //     if(loaded) {
-  //       console.log("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
-  //       initTexture(gl, u_Sampler, u_UseTextures, images);
-  //       buildScene(gl, u_ModelMatrix, u_NormalMatrix, u_isLighting);
-  //     } else {
-  //       console.log("there");
-  //     }
-  // }
-
-  // } catch {
-  //   console.log('Failed to initialize textures');
-  //   return;
-  // }
+  buildScene(gl, u_ModelMatrix, u_NormalMatrix, global_x, global_y, global_z);
 
 }
 
@@ -899,12 +851,11 @@ function buildTv(gl, u_ModelMatrix, u_NormalMatrix, n, translate_x, translate_y,
   drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
   modelMatrix = popMatrix();
 
-  buildTvScreen(gl, u_ModelMatrix, u_NormalMatrix, initVertexBuffers(gl, 77/11, 40/117, 0.3), translate_x, translate_y, translate_z);
+  buildTvScreen(gl, u_ModelMatrix, u_NormalMatrix, initVertexBuffers(gl), translate_x, translate_y, translate_z);
 
 }
 
 function buildTvScreen(gl, u_ModelMatrix, u_NormalMatrix, n, translate_x, translate_y, translate_z) {
-  console.log(screenOn)
   if(screenOn){
     gl.bindTexture(gl.TEXTURE_2D, textures[9]);
   } else {
@@ -1086,30 +1037,30 @@ function buildSofa(gl, u_ModelMatrix, u_NormalMatrix, n, translate_x, translate_
   modelMatrix = popMatrix();
 }
 
-function buildScene(gl, u_ModelMatrix, u_NormalMatrix, u_isLighting, global_x, global_y, global_z) {
-  buildChair(gl, u_ModelMatrix, u_NormalMatrix, initVertexBuffers(gl, 0.55, 0.35, 0.1), global_x+1, global_y+0, global_z+chairPos1, "far");
-  buildChair(gl, u_ModelMatrix, u_NormalMatrix, initVertexBuffers(gl, 0.55, 0.35, 0.1), global_x+5, global_y+0, global_z+chairPos1, "far");
-  buildChair(gl, u_ModelMatrix, u_NormalMatrix, initVertexBuffers(gl, 0.55, 0.35, 0.1), global_x+1, global_y+0, global_z+chairPos2, "near");
-  buildChair(gl, u_ModelMatrix, u_NormalMatrix, initVertexBuffers(gl, 0.55, 0.35, 0.1), global_x+5, global_y+0, global_z+chairPos2, "near");
+function buildScene(gl, u_ModelMatrix, u_NormalMatrix, global_x, global_y, global_z) {
+  buildChair(gl, u_ModelMatrix, u_NormalMatrix, initVertexBuffers(gl), global_x+1, global_y+0, global_z+chairPos1, "far");
+  buildChair(gl, u_ModelMatrix, u_NormalMatrix, initVertexBuffers(gl), global_x+5, global_y+0, global_z+chairPos1, "far");
+  buildChair(gl, u_ModelMatrix, u_NormalMatrix, initVertexBuffers(gl), global_x+1, global_y+0, global_z+chairPos2, "near");
+  buildChair(gl, u_ModelMatrix, u_NormalMatrix, initVertexBuffers(gl), global_x+5, global_y+0, global_z+chairPos2, "near");
 
-  buildTv(gl, u_ModelMatrix, u_NormalMatrix, initVertexBuffers(gl, 77/11, 40/117, 0.3), global_x+22.5, global_y+TVPos+0.5, global_z+10);
-  buildRemote(gl, u_ModelMatrix, u_NormalMatrix, initVertexBuffers(gl, 77/11, 40/117, 0.3), global_x+22+remotePos_x, global_y+2+Math.sin(rotateRem_y), global_z+17.5+Math.sin(rotateRem_z));
+  buildTv(gl, u_ModelMatrix, u_NormalMatrix, initVertexBuffers(gl), global_x+22.5, global_y+TVPos+0.5, global_z+10);
+  buildRemote(gl, u_ModelMatrix, u_NormalMatrix, initVertexBuffers(gl), global_x+22+remotePos_x, global_y+2+Math.sin(rotateRem_y), global_z+17.5+Math.sin(rotateRem_z));
 
-  buildTable(gl, u_ModelMatrix, u_NormalMatrix, initVertexBuffers(gl, 77/117, 40/117, 0.3), global_x+1, global_y+1, global_z+16);
+  buildTable(gl, u_ModelMatrix, u_NormalMatrix, initVertexBuffers(gl), global_x+1, global_y+1, global_z+16);
   if(platePresent){
-    buildPlateSetup(gl, u_ModelMatrix, u_NormalMatrix, initVertexBuffers(gl, 77/11, 40/117, 0.3), global_x+17, global_y+platePos, global_z+18);
-    buildPlateSetup(gl, u_ModelMatrix, u_NormalMatrix, initVertexBuffers(gl, 77/11, 40/117, 0.3), global_x+13.75, global_y+platePos, global_z+18);
-    buildPlateSetup(gl, u_ModelMatrix, u_NormalMatrix, initVertexBuffers(gl, 77/11, 40/117, 0.3), global_x+17, global_y+platePos, global_z+20);
-    buildPlateSetup(gl, u_ModelMatrix, u_NormalMatrix, initVertexBuffers(gl, 77/11, 40/117, 0.3), global_x+13.75, global_y+platePos, global_z+20);
+    buildPlateSetup(gl, u_ModelMatrix, u_NormalMatrix, initVertexBuffers(gl), global_x+17, global_y+platePos, global_z+18);
+    buildPlateSetup(gl, u_ModelMatrix, u_NormalMatrix, initVertexBuffers(gl), global_x+13.75, global_y+platePos, global_z+18);
+    buildPlateSetup(gl, u_ModelMatrix, u_NormalMatrix, initVertexBuffers(gl), global_x+17, global_y+platePos, global_z+20);
+    buildPlateSetup(gl, u_ModelMatrix, u_NormalMatrix, initVertexBuffers(gl), global_x+13.75, global_y+platePos, global_z+20);
   }
 
-  buildLamp(gl, u_ModelMatrix, u_NormalMatrix, initVertexBuffers(gl, 77/117, 40/117, 0.3), global_x+23, global_y+0, global_z+2);
-  buildLamp(gl, u_ModelMatrix, u_NormalMatrix, initVertexBuffers(gl, 77/117, 40/117, 0.3), global_x+23, global_y+0, global_z+22);
+  buildLamp(gl, u_ModelMatrix, u_NormalMatrix, initVertexBuffers(gl), global_x+23, global_y+0, global_z+2);
+  buildLamp(gl, u_ModelMatrix, u_NormalMatrix, initVertexBuffers(gl), global_x+23, global_y+0, global_z+22);
   
-  buildTvStand(gl, u_ModelMatrix, u_NormalMatrix, initVertexBuffers(gl, 77/11, 40/117, 0.3), global_x+21.5, global_y+0, global_z+8);
+  buildTvStand(gl, u_ModelMatrix, u_NormalMatrix, initVertexBuffers(gl), global_x+21.5, global_y+0, global_z+8);
 
-  buildSofa(gl, u_ModelMatrix, u_NormalMatrix, initVertexBuffers(gl, 77/11, 40/117, 0.3), global_x+13, global_y, global_z+9);
-  buildPouffe(gl, u_ModelMatrix, u_NormalMatrix, initVertexBuffers(gl, 77/11, 40/117, 0.3), global_x+17, global_y+0, global_z+pouffePos);
+  buildSofa(gl, u_ModelMatrix, u_NormalMatrix, initVertexBuffers(gl), global_x+13, global_y, global_z+9);
+  buildPouffe(gl, u_ModelMatrix, u_NormalMatrix, initVertexBuffers(gl), global_x+17, global_y+0, global_z+pouffePos);
  
-  buildFloor(gl, u_ModelMatrix, u_NormalMatrix, initVertexBuffers(gl, 1, 1, 1), global_x, global_y, global_z-2.5);
+  buildFloor(gl, u_ModelMatrix, u_NormalMatrix, initVertexBuffers(gl), global_x, global_y, global_z-2.5);
 }
