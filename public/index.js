@@ -327,7 +327,7 @@ function tvbop() {
   if(moveRemote) {
     if(rotatingRem){
       rotateRem_y = (rotateRem_y + Math.PI/10) % Math.PI;
-      rotateRem_z = (rotateRem_y + Math.PI/10) % Math.PI;
+      rotateRem_z = ((rotateRem_y + Math.PI/10) % Math.PI) - Math.PI/2;
       remoteCount += 1;
 
       if(remoteCount % (rotateLim/2) == 0) {
@@ -952,12 +952,14 @@ function buildPouffe(gl, u_ModelMatrix, u_NormalMatrix, n, translate_x, translat
   drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
   modelMatrix = popMatrix();
 
+  gl.bindTexture(gl.TEXTURE_2D, textures[8]);
   pushMatrix(modelMatrix);
   modelMatrix.translate(translate_x-0.125, translate_y-0.5, translate_z-1.125);  
   modelMatrix.scale(3.25, 0.75, 3.25);
   drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
   modelMatrix = popMatrix();
 
+  gl.bindTexture(gl.TEXTURE_2D, textures[2]);
   pushMatrix(modelMatrix);
   modelMatrix.translate(translate_x+2.5, translate_y-2, translate_z+1.5);  
   modelMatrix.scale(0.5, 0.5, 0.5);
@@ -1015,6 +1017,7 @@ function buildSofa(gl, u_ModelMatrix, u_NormalMatrix, n, translate_x, translate_
   drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
   modelMatrix = popMatrix();
 
+  gl.bindTexture(gl.TEXTURE_2D, textures[8]);
   pushMatrix(modelMatrix);
   modelMatrix.translate(translate_x, translate_y-0.5, translate_z+1.9);  
   modelMatrix.scale(3.125, 0.75, 2.95);
@@ -1039,6 +1042,7 @@ function buildSofa(gl, u_ModelMatrix, u_NormalMatrix, n, translate_x, translate_
   drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
   modelMatrix = popMatrix();
 
+  gl.bindTexture(gl.TEXTURE_2D, textures[2]);
   pushMatrix(modelMatrix);
   modelMatrix.translate(translate_x, translate_y-1.5, translate_z+11);  
   modelMatrix.scale(3.125, 3, 1);
