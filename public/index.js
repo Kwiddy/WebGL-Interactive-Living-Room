@@ -1,3 +1,4 @@
+// Create the vertex shader
 var VSHADER_SOURCE =
   'attribute vec4 a_Position;\n' +
   'attribute vec4 a_Color;\n' +
@@ -38,6 +39,7 @@ var VSHADER_SOURCE =
   '  }\n' + 
   '}\n';
 
+  // Create the Fragment Shader
   var FSHADER_SOURCE =
   '#ifdef GL_ES\n' +
   'precision mediump float;\n' +
@@ -59,21 +61,27 @@ var VSHADER_SOURCE =
   '  gl_FragColor = texture2D(u_Sampler, v_TexCoord);\n' +
   '}\n';
 
+// Initalise the display matrices
 var modelMatrix = new Matrix4();
 var viewMatrix = new Matrix4();
 var projMatrix = new Matrix4();
 var g_normalMatrix = new Matrix4();
 
+// Create matrix stack for pushing and popping 
 var g_matrixStack = []; 
+
+// Create arrays for storing the textures and their images
 var textures = [];
 var images = [];
 
+// Global x, y, and z coordinates for scene construction
 var global_x = 0;
 var global_y = 0;
 var global_z = 0;
 
+// Create view variables for camera manipulation
 var a1_View = 18;
-var a2_View = -5;
+var a2_View = 5;
 var a3_View = 60;
 var b1_View = 0;
 var b2_View = 0;
@@ -82,13 +90,14 @@ var c1_View = 0;
 var c2_View = 1;
 var c3_View = 0;
 
+// Create view variables for camera rotation
 var ANGLE_STEP = 1.0;
-var g_xAngle = 10.0;//10.0;
+var g_xAngle = 0.0;
 var g_yAngle = 0.0;
 
+// Initilize Variables
 var canvas;
 var gl;
-
 var u_ModelMatrix;
 var u_ViewMatrix;
 var u_NormalMatrix;
@@ -100,12 +109,13 @@ var u_LightPosition;
 var u_Sampler;
 var u_UseTextures;
 var u_isLighting;
-
 var a_Position;
 
+// Initialize light variables
 var u_lightPosition = [0,0,0];
 var u_lightColor = [0,0,0];
 
+// Define booleans and limits for "C" animation
 var chairPos1 = 13;
 var chairPos2 = 22;
 var chairTowards1 = false;
@@ -115,10 +125,12 @@ var chairAway2 = false;
 var platePos = 2;
 var platePresent = false;
 
+// Define booleans and limits for "P" animation
 var pouffePos = 18;
 var pouffeAway = false;
 var pouffeTowards = false;
 
+// Define booleans and limits for "T" animation
 var tvBounce = false;
 var TVPos = 0;
 var remotePos_x = 0;
@@ -132,33 +144,40 @@ var rotateDone = false;
 var TVUp = 1;
 var screenOn = false;
 
+// Begin main functino
 function main() {
 
     var canvas = document.getElementById('webgl');
 
+    // Detect canvas dimensions and resize
     var width = canvas.width;
     var height = canvas.height;
-
     canvas.width = nextPowerof2(width);
     canvas.height = nextPowerof2(height);
 
+    //Store object storing current state of graphics library 
     gl = getWebGLContext(canvas);
   
+    //Check rendering context retrieval
     if (!gl) {
       console.log('Failed to get the rendering context for WebGL');
       return;
     }
   
+    // Check shader initialization
     if (!initShaders(gl, VSHADER_SOURCE, FSHADER_SOURCE)) {
       console.log('Failed to intialize shaders.');
       return;
     }
 
+    // Specify values for clearing color buffers and clear
     gl.clearColor(0.0, 0.0, 0.0, 0.8);
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
+    // Perform depth test on fragment
     gl.enable(gl.DEPTH_TEST);
 
+    // Retrieve locations of uniform variables
     u_ModelMatrix = gl.getUniformLocation(gl.program, 'u_ModelMatrix');
     u_ViewMatrix = gl.getUniformLocation(gl.program, 'u_ViewMatrix');
     u_NormalMatrix = gl.getUniformLocation(gl.program, 'u_NormalMatrix');
@@ -171,27 +190,34 @@ function main() {
     u_UseTextures = gl.getUniformLocation(gl.program, 'u_UseTextures');
     u_isLighting = gl.getUniformLocation(gl.program, 'u_isLighting');
 
+    // Check uniform variable location retrieval
     if (!u_ModelMatrix || !u_ViewMatrix || !u_NormalMatrix || !u_ProjMatrix || !u_LightColor || !u_AmbientLight || !u_LightDirection || !u_isLighting) { 
       console.log('Failed to Get the storage locations of u_ModelMatrix, u_ViewMatrix, and/or u_ProjMatrix');
       return;
     }
 
+    // Specify initial values
     gl.uniform3f(u_LightColor, 1.0, 1.0, 1.0);
     gl.uniform3f(u_AmbientLight, 0.3, 0.3, 0.3);
     gl.uniform3fv(u_LightDirection, [0.5/7.5, 3.0/7.5, 4.0/7.5]);
     gl.uniform3fv(u_LightPosition, [5.0/7.0, 1.0/7.0, 2.0/7.0]);
 
+    // Set look at and set perspective
     viewMatrix.setLookAt(a1_View, a2_View, a3_View, b1_View, b2_View, b3_View, c1_View, c2_View, c3_View);
     projMatrix.setPerspective(45, canvas.width/canvas.height, 1, 100);
+    
+    // Specify matrix values of view and projection matrices 
     gl.uniformMatrix4fv(u_ViewMatrix, false, viewMatrix.elements);
     gl.uniformMatrix4fv(u_ProjMatrix, false, projMatrix.elements);
 
+    // Detect user keydown for camera movement
     document.onkeydown = function(ev) {
         keydown(ev, gl, u_ViewMatrix);
     };
 
     // var n = initVertexBuffers(gl, 0.55, 0.35, 0.1);
 
+    // Generate a new image for each texture
     img1 = new Image();
     img2 = new Image();
     img3 = new Image();
@@ -241,6 +267,7 @@ function main() {
     //Remote buttons
     img12.src = "textures/red_256x256.png"
 
+    // Add new texture images to array
     images.push(img1);
     images.push(img2);
     images.push(img3);
@@ -254,22 +281,31 @@ function main() {
     images.push(img11);
     images.push(img12);
 
+    // Load final texture and initialize
     img12.onload = function() {initTexture(gl, u_Sampler, u_UseTextures, images);}; 
     
     requestAnimationFrame(update);
 };
 
+
+// Update the scene with animation frames
 function update() {
   //Animations
   dinnertime();
   movePouffe();
   tvbop();
 
+  // Draw matrix
   draw(gl, u_ModelMatrix, u_NormalMatrix, u_isLighting);
+  
+  // Request animation frame for update
   requestAnimationFrame(update);
 }
 
+// "C" animation
 function dinnertime() {
+  // Move chair away from table if required up to predefined limit
+  //  Otherwise, move towards
   if(chairAway1) {
     if(chairPos1 == 11){
       chairAway1 = false;
@@ -283,7 +319,6 @@ function dinnertime() {
       chairPos1 += 0.25
     }
   }
-
   if(chairTowards2) {
     if(chairPos2 == 24){
       chairTowards2 = false;
@@ -298,6 +333,7 @@ function dinnertime() {
       }
   }
 
+  // Descent plates if bool is true
   if(platePresent) {
     if(platePos != 0) {
       platePos -= 0.25;
@@ -305,7 +341,9 @@ function dinnertime() {
   }
 }
 
+// "P" animation
 function movePouffe() {
+  //Move pouffe backwards and forwards to predefined limits
   if(pouffeAway) {
     if(pouffePos == 9){
       pouffeAway = false;
@@ -321,19 +359,28 @@ function movePouffe() {
   }
 }
 
+// "T" animation
 function tvbop() {
+  // Set limit for tv remote animation
   var rotateLim = 9; 
 
+  // Remove tv remote
   if(moveRemote) {
+    //Detect rotating stage in animation
     if(rotatingRem){
+      // Set circular motion
       rotateRem_y = (rotateRem_y + Math.PI/10) % Math.PI;
       rotateRem_z = ((rotateRem_y + Math.PI/10) % Math.PI) - Math.PI/2;
+      
+      //Increment counter
       remoteCount += 1;
 
+      // Detect when remote has finished cycle
       if(remoteCount % (rotateLim/2) == 0) {
         rotateDone = true;
       }
 
+      // Change bools as rotation has now finished
       if(remoteCount % rotateLim == 0){
         rotateRem_z = 0;
         rotateRem_y = 0;
@@ -342,6 +389,9 @@ function tvbop() {
         screenOn = !screenOn;
       }
     } else {
+      // sliding the remote out from initial position
+      //  and returning to initial position when required
+      //  based on the completion of the rotation
       if (remoteOut){
         if(remotePos_x > -5) {
           remotePos_x -= 0.5;
@@ -359,6 +409,9 @@ function tvbop() {
     }
   }
 
+  // Animate the TV for once rotation has completed
+  // Move the TV up and then down to predefined limits
+  //  Before stopping
   if(rotateDone){
     if(tvBounce) {
       if(TVUp == 1) {
@@ -380,269 +433,332 @@ function tvbop() {
   }
 }
 
+// Find the next power of 2 for canvas size
 function nextPowerof2(value) {
   return Math.pow(2, Math.ceil(Math.log(value) / Math.log(2)));
 }
 
+// Check that a value is a power of 2
 function isPowerof2(value) {
   return (value & (value - 1)) === 0;
 }
 
+// For when a key has been presesd
 function keydown(ev, gl, u_ViewMatrix) {
-    switch (ev.keyCode) {
-        case 40: //up
-            g_xAngle = (g_xAngle + ANGLE_STEP) % 360;
-            break;
-        case 38: //down
-            g_xAngle = (g_xAngle - ANGLE_STEP) % 360;
-            break;
-        case 37: //left
-            g_yAngle = (g_yAngle - ANGLE_STEP) % 360;
-            break;
-        case 39: //right
-            g_yAngle = (g_yAngle + ANGLE_STEP) % 360;
-            break;
-        case 65: //a(left)
-            a1_View += 0.2
-            break;
-        case 87: //w(up)
-            a2_View -= 0.2
-            break;
-        case 83: //s(down)
-            a2_View += 0.2
-            break;
-        case 68: //d(right)
-            a1_View -= 0.2;
-            break;
-        case 90: //z(forwards)
-            a3_View -= 0.2;
-            break;
-        case 88: //d(backwards)
-            a3_View += 0.2;
-            break;
-        case 67: //c (animate chair and plate & cutlery)
-            if(chairPos1 == 13) {
-              platePresent = true;
-              chairAway1 = true;
-            } 
-            else {
-              platePresent = false;
-              platePos = 2;
-              chairTowards1 = true;
-              }
-              
-            if(chairPos2 == 22) {
-              chairTowards2 = true;
-            } 
-            else {
-              chairAway2 = true;
-              }
-            break;
-        case 84: //t (animate TV)
-            tvBounce = true;
-            moveRemote = true;
-            break;
-        case 80: //p (animate Pouffe)
-        if(pouffePos == 18) {
-          pouffeAway = true;
-        } 
-        else {
-          pouffeTowards = true;
-          }
-        break;
-      default: return;
-    }
-    viewMatrix.setLookAt(a1_View, a2_View, a3_View, b1_View, b2_View, b3_View, c1_View, c2_View, c3_View);
-    viewMatrix.rotate(g_yAngle, 0, 1, 0); 
-    viewMatrix.rotate(g_xAngle, 1, 0, 0);  
-    gl.uniformMatrix4fv(u_ViewMatrix, false, viewMatrix.elements); 
+  // Detect the key pressed
+  switch (ev.keyCode) {
+      case 40: //up
+          g_xAngle = (g_xAngle + ANGLE_STEP) % 360;
+          break;
+      case 38: //down
+          g_xAngle = (g_xAngle - ANGLE_STEP) % 360;
+          break;
+      case 37: //left
+          g_yAngle = (g_yAngle - ANGLE_STEP) % 360;
+          break;
+      case 39: //right
+          g_yAngle = (g_yAngle + ANGLE_STEP) % 360;
+          break;
+      case 65: //a(left)
+          a1_View += 0.2
+          break;
+      case 87: //w(up)
+          a2_View -= 0.2
+          break;
+      case 83: //s(down)
+          a2_View += 0.2
+          break;
+      case 68: //d(right)
+          a1_View -= 0.2;
+          break;
+      case 90: //z(forwards)
+          a3_View -= 0.2;
+          break;
+      case 88: //d(backwards)
+          a3_View += 0.2;
+          break;
+      case 67: //c (animate chair and plate & cutlery)
+          if(chairPos1 == 13) {
+            platePresent = true;
+            chairAway1 = true;
+          } 
+          else {
+            platePresent = false;
+            platePos = 2;
+            chairTowards1 = true;
+            }
+            
+          if(chairPos2 == 22) {
+            chairTowards2 = true;
+          } 
+          else {
+            chairAway2 = true;
+            }
+          break;
+      case 84: //t (animate TV)
+          tvBounce = true;
+          moveRemote = true;
+          break;
+      case 80: //p (animate Pouffe)
+      if(pouffePos == 18) {
+        pouffeAway = true;
+      } 
+      else {
+        pouffeTowards = true;
+        }
+      break;
+    default: return;
   }
 
+  // Set look at for the view matrix with the updated variables
+  viewMatrix.setLookAt(a1_View, a2_View, a3_View, b1_View, b2_View, b3_View, c1_View, c2_View, c3_View);
+  
+  // Set viewmatrix rotation as required
+  viewMatrix.rotate(g_yAngle, 0, 1, 0); 
+  viewMatrix.rotate(g_xAngle, 1, 0, 0); 
+  
+  // Specify matrix values
+  gl.uniformMatrix4fv(u_ViewMatrix, false, viewMatrix.elements); 
+  }
+
+// Initialize vertex buffers
 function initVertexBuffers(gl) {
-    var vertices = new Float32Array([   
-      0.5, 0.5, 0.5,  -0.5, 0.5, 0.5,  -0.5,-0.5, 0.5,   0.5,-0.5, 0.5, 
-      0.5, 0.5, 0.5,   0.5,-0.5, 0.5,   0.5,-0.5,-0.5,   0.5, 0.5,-0.5, 
-      0.5, 0.5, 0.5,   0.5, 0.5,-0.5,  -0.5, 0.5,-0.5,  -0.5, 0.5, 0.5, 
-      -0.5, 0.5, 0.5,  -0.5, 0.5,-0.5,  -0.5,-0.5,-0.5,  -0.5,-0.5, 0.5, 
-      -0.5,-0.5,-0.5,   0.5,-0.5,-0.5,   0.5,-0.5, 0.5,  -0.5,-0.5, 0.5, 
-      0.5,-0.5,-0.5,  -0.5,-0.5,-0.5,  -0.5, 0.5,-0.5,   0.5, 0.5,-0.5  
-    ]);
-    
-    var normals = new Float32Array([    
-      0.0, 0.0, 1.0,   0.0, 0.0, 1.0,   0.0, 0.0, 1.0,   0.0, 0.0, 1.0,  
-      1.0, 0.0, 0.0,   1.0, 0.0, 0.0,   1.0, 0.0, 0.0,   1.0, 0.0, 0.0,  
-      0.0, 1.0, 0.0,   0.0, 1.0, 0.0,   0.0, 1.0, 0.0,   0.0, 1.0, 0.0,  
-      -1.0, 0.0, 0.0,  -1.0, 0.0, 0.0,  -1.0, 0.0, 0.0,  -1.0, 0.0, 0.0,  
-      0.0,-1.0, 0.0,   0.0,-1.0, 0.0,   0.0,-1.0, 0.0,   0.0,-1.0, 0.0,  
-      0.0, 0.0,-1.0,   0.0, 0.0,-1.0,   0.0, 0.0,-1.0,   0.0, 0.0,-1.0   
-    ]);
-   
-    var indices = new Uint8Array([
-      0, 1, 2,   0, 2, 3,    
-      4, 5, 6,   4, 6, 7,    
-      8, 9,10,   8,10,11,    
-      12,13,14,  12,14,15,    
-      16,17,18,  16,18,19,    
-      20,21,22,  20,22,23     
-    ]);
+  // Create vertices array
+  var vertices = new Float32Array([   
+    0.5, 0.5, 0.5,  -0.5, 0.5, 0.5,  -0.5,-0.5, 0.5,   0.5,-0.5, 0.5, 
+    0.5, 0.5, 0.5,   0.5,-0.5, 0.5,   0.5,-0.5,-0.5,   0.5, 0.5,-0.5, 
+    0.5, 0.5, 0.5,   0.5, 0.5,-0.5,  -0.5, 0.5,-0.5,  -0.5, 0.5, 0.5, 
+    -0.5, 0.5, 0.5,  -0.5, 0.5,-0.5,  -0.5,-0.5,-0.5,  -0.5,-0.5, 0.5, 
+    -0.5,-0.5,-0.5,   0.5,-0.5,-0.5,   0.5,-0.5, 0.5,  -0.5,-0.5, 0.5, 
+    0.5,-0.5,-0.5,  -0.5,-0.5,-0.5,  -0.5, 0.5,-0.5,   0.5, 0.5,-0.5  
+  ]);
+  
+  // Create normals array
+  var normals = new Float32Array([    
+    0.0, 0.0, 1.0,   0.0, 0.0, 1.0,   0.0, 0.0, 1.0,   0.0, 0.0, 1.0,  
+    1.0, 0.0, 0.0,   1.0, 0.0, 0.0,   1.0, 0.0, 0.0,   1.0, 0.0, 0.0,  
+    0.0, 1.0, 0.0,   0.0, 1.0, 0.0,   0.0, 1.0, 0.0,   0.0, 1.0, 0.0,  
+    -1.0, 0.0, 0.0,  -1.0, 0.0, 0.0,  -1.0, 0.0, 0.0,  -1.0, 0.0, 0.0,  
+    0.0,-1.0, 0.0,   0.0,-1.0, 0.0,   0.0,-1.0, 0.0,   0.0,-1.0, 0.0,  
+    0.0, 0.0,-1.0,   0.0, 0.0,-1.0,   0.0, 0.0,-1.0,   0.0, 0.0,-1.0   
+  ]);
+  
+  // Create indices array
+  var indices = new Uint8Array([
+    0, 1, 2,   0, 2, 3,    
+    4, 5, 6,   4, 6, 7,    
+    8, 9,10,   8,10,11,    
+    12,13,14,  12,14,15,    
+    16,17,18,  16,18,19,    
+    20,21,22,  20,22,23     
+  ]);
 
-    var verticesTexCoords = new Float32Array([   
-      1, 1, 1,  0, 1, 1,  0,0, 1,   1,0, 1, 
-      1, 1, 1,   1,0, 1,   1,0,0,   1, 1,0, 
-      1, 1, 1,  1, 1,0,  0, 1,0,  0, 1,1, 
-      0,1,1,  0, 1,0,  0,0,0,  0,0,1, 
-      0,0,0,  1,0,0,   1,0, 1,  0,0,1, 
-      1,0,0,  0,0,0,  0, 1,0,   1,1,0
-    ]);
-    var n=36;
+  // Create array for texture coordinates
+  var verticesTexCoords = new Float32Array([ 
 
-    if (!initArrayBuffer(gl, 'a_Position', vertices, 3, gl.FLOAT)) return -1;
-    if (!initArrayBuffer(gl, 'a_Normal', normals, 3, gl.FLOAT)) return -1;
+    // 1.0, 1.0,   0.0, 1.0,   0.0, 0.0,   1.0, 0.0,
+    // 0.0, 1.0,   0.0, 0.0,   1.0, 0.0,   1.0, 1.0,
+    // 1.0, 0.0,   1.0, 1.0,   0.0, 1.0,   0.0, 0.0,
+    // 1.0, 1.0,   0.0, 1.0,   0.0, 0.0,   1.0, 0.0,
+    // 0.0, 0.0,   1.0, 0.0,   1.0, 1.0,   0.0, 1.0,
+    // 0.0, 0.0,   1.0, 0.0,   1.0, 1.0,   0.0, 1.0
 
-    var vertexTexCoordBuffer = gl.createBuffer();
-    if (!vertexTexCoordBuffer) {
+    1, 1, 1,  0, 1, 1,  0,0, 1,   1,0, 1, 
+    1, 1, 1,   1,0, 1,   1,0,0,   1, 1,0, 
+    1, 1, 1,  1, 1,0,  0, 1,0,  0, 1,1, 
+    0,1,1,  0,1,0,  0,0,0,  0,0,1, 
+    0,0,0,  1,0,0,   1,0,1,  0,0,1, 
+    1,0,0,  0,0,0,  0,1,0,   1,1,0
+  ]);
+  var n=36;
+
+  if (!initArrayBuffer(gl, 'a_Position', vertices, 3, gl.FLOAT)) return -1;
+  if (!initArrayBuffer(gl, 'a_Normal', normals, 3, gl.FLOAT)) return -1;
+
+  // Create texture coordinate buffer object and error handle
+  var vertexTexCoordBuffer = gl.createBuffer();
+  if (!vertexTexCoordBuffer) {
+    console.log('Failed to create the buffer object');
+    return false;
+  }
+
+  // Create index buffer object and error handle
+  var indexBuffer = gl.createBuffer();
+  if (!indexBuffer) {
       console.log('Failed to create the buffer object');
       return false;
-    }
+  }
 
-    var indexBuffer = gl.createBuffer();
-    if (!indexBuffer) {
-        console.log('Failed to create the buffer object');
-        return false;
-    }
+  // Bind buffers and assign buffer data
+  gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indexBuffer);
+  gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, indices, gl.STATIC_DRAW);
+  gl.bindBuffer(gl.ARRAY_BUFFER, vertexTexCoordBuffer);
+  gl.bufferData(gl.ARRAY_BUFFER, verticesTexCoords, gl.STATIC_DRAW);
 
-    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indexBuffer);
-    gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, indices, gl.STATIC_DRAW);
-    gl.bindBuffer(gl.ARRAY_BUFFER, vertexTexCoordBuffer);
-    gl.bufferData(gl.ARRAY_BUFFER, verticesTexCoords, gl.STATIC_DRAW);
+  // Bind vertexTexCoordBuffer
+  gl.vertexAttribPointer(a_Position, 3, gl.FLOAT, false, 0, 0);
+  gl.enableVertexAttribArray(a_Position);
 
-    gl.vertexAttribPointer(a_Position, 3, gl.FLOAT, false, 0, 0);
-    gl.enableVertexAttribArray(a_Position);
+  // store tex coordinate location
+  var a_TexCoord = gl.getAttribLocation(gl.program, 'a_TexCoord');
 
-    var a_TexCoord = gl.getAttribLocation(gl.program, 'a_TexCoord');
+  gl.vertexAttribPointer(a_TexCoord, 3, gl.FLOAT, false, 0, 0);
+  gl.enableVertexAttribArray(a_TexCoord);
 
-    gl.vertexAttribPointer(a_TexCoord, 3, gl.FLOAT, false, 0, 0);
-    gl.enableVertexAttribArray(a_TexCoord);
-
-    return n;
+  return n;
 }
 
+// Initialize array buffer
 function initArrayBuffer (gl, attribute, data, num, type) {
-    var buffer = gl.createBuffer();
-    if (!buffer) {
-      console.log('Failed to create the buffer object');
-      return false;
-    }
+  // Create buffer and error handle
+  var buffer = gl.createBuffer();
+  if (!buffer) {
+    console.log('Failed to create the buffer object');
+    return false;
+  }
 
-    gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
-    gl.bufferData(gl.ARRAY_BUFFER, data, gl.STATIC_DRAW);
+  // Bind buffer
+  gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+  // Create buffer object's data store
+  gl.bufferData(gl.ARRAY_BUFFER, data, gl.STATIC_DRAW);
 
-    var a_attribute = gl.getAttribLocation(gl.program, attribute);
-    if (a_attribute < 0) {
-      console.log('Failed to get the storage location of ' + attribute);
-      return false;
-    }
+  // store attribute location and error handle
+  var a_attribute = gl.getAttribLocation(gl.program, attribute);
+  if (a_attribute < 0) {
+    console.log('Failed to get the storage location of ' + attribute);
+    return false;
+  }
 
-    gl.vertexAttribPointer(a_attribute, num, type, false, 0, 0);
-    gl.enableVertexAttribArray(a_attribute);
-  
-    gl.bindBuffer(gl.ARRAY_BUFFER, null);
-  
-    return true;
+  // binds buffer to attribute
+  gl.vertexAttribPointer(a_attribute, num, type, false, 0, 0);
+  gl.enableVertexAttribArray(a_attribute);
+
+  // reset the array buffer
+  gl.bindBuffer(gl.ARRAY_BUFFER, null);
+
+  return true;
 }
 
+// Set vertex information
 function initAxesVertexBuffers(gl) {
+  // Set vertices colours
+  var verticesColors = new Float32Array([
+    -20.0,  0.0,   0.0,  1.0,  1.0,  1.0,  
+      20.0,  0.0,   0.0,  1.0,  1.0,  1.0,
+      0.0,  20.0,   0.0,  1.0,  1.0,  1.0, 
+      0.0, -20.0,   0.0,  1.0,  1.0,  1.0,
+      0.0,   0.0, -20.0,  1.0,  1.0,  1.0, 
+      0.0,   0.0,  20.0,  1.0,  1.0,  1.0 
+  ]);
+  var n = 6;
 
-    var verticesColors = new Float32Array([
-      -20.0,  0.0,   0.0,  1.0,  1.0,  1.0,  
-       20.0,  0.0,   0.0,  1.0,  1.0,  1.0,
-       0.0,  20.0,   0.0,  1.0,  1.0,  1.0, 
-       0.0, -20.0,   0.0,  1.0,  1.0,  1.0,
-       0.0,   0.0, -20.0,  1.0,  1.0,  1.0, 
-       0.0,   0.0,  20.0,  1.0,  1.0,  1.0 
-    ]);
-    var n = 6;
+  // Create vertex colour buffer and error handling
+  var vertexColorBuffer = gl.createBuffer();  
+  if (!vertexColorBuffer) {
+    console.log('Failed to create the buffer object');
+    return false;
+  }
+
+  // Bind buffer to ARRAY_BUFFER
+  gl.bindBuffer(gl.ARRAY_BUFFER, vertexColorBuffer);
+  gl.bufferData(gl.ARRAY_BUFFER, verticesColors, gl.STATIC_DRAW);
+
+  // Get size of elements
+  var FSIZE = verticesColors.BYTES_PER_ELEMENT;
   
-    var vertexColorBuffer = gl.createBuffer();  
-    if (!vertexColorBuffer) {
-      console.log('Failed to create the buffer object');
-      return false;
-    }
-  
-    gl.bindBuffer(gl.ARRAY_BUFFER, vertexColorBuffer);
-    gl.bufferData(gl.ARRAY_BUFFER, verticesColors, gl.STATIC_DRAW);
-  
-    var FSIZE = verticesColors.BYTES_PER_ELEMENT;
-    a_Position = gl.getAttribLocation(gl.program, 'a_Position');
-    if (a_Position < 0) {
-      console.log('Failed to get the storage location of a_Position');
-      return -1;
-    }
-    gl.vertexAttribPointer(a_Position, 3, gl.FLOAT, false, FSIZE * 6, 0);
-    gl.enableVertexAttribArray(a_Position);  
-  
-    var a_Color = gl.getAttribLocation(gl.program, 'a_Color');
-    if(a_Color < 0) {
-      console.log('Failed to get the storage location of a_Color');
-      return -1;
-    }
-    gl.vertexAttribPointer(a_Color, 3, gl.FLOAT, false, FSIZE * 6, FSIZE * 3);
-    gl.enableVertexAttribArray(a_Color);  
-  
-    gl.bindBuffer(gl.ARRAY_BUFFER, null);
-  
-    return n;
+  // Store position and error handling
+  a_Position = gl.getAttribLocation(gl.program, 'a_Position');
+  if (a_Position < 0) {
+    console.log('Failed to get the storage location of a_Position');
+    return -1;
+  }
+
+  // Bind vertexColorBuffer to a_Position
+  gl.vertexAttribPointer(a_Position, 2, gl.FLOAT, false, FSIZE * 6, 0);
+  gl.enableVertexAttribArray(a_Position);  
+
+  // Get color location and error handling
+  var a_Color = gl.getAttribLocation(gl.program, 'a_Color');
+  if(a_Color < 0) {
+    console.log('Failed to get the storage location of a_Color');
+    return -1;
+  }
+
+  // Bind vertexColorBuffer to a_color
+  gl.vertexAttribPointer(a_Color, 2, gl.FLOAT, false, FSIZE * 6, FSIZE * 3);
+  gl.enableVertexAttribArray(a_Color);  
+
+  // Reset ARRAY_BUFFER
+  gl.bindBuffer(gl.ARRAY_BUFFER, null);
+
+  return n;
 }
 
+//Push Matrix to matrix stack
 function pushMatrix(m) { 
   var m2 = new Matrix4(m);
   g_matrixStack.push(m2);
 }
 
+// Pop matrix from matric stack
 function popMatrix() { 
   return g_matrixStack.pop();
 }
 
+// Initialize drawing of scene
 function draw(gl, u_ModelMatrix, u_NormalMatrix, u_isLighting) {
 
+  // C;ear buffer bits
   gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
   
+  // Set vertex information and error handling
   var n = initAxesVertexBuffers(gl);
   if (n < 0) {
     console.log('Failed to set the vertex information');
     return;
   }
   
+  // Set is lighting to true
   gl.uniform1i(u_isLighting, true); 
 
+  // Construct the scene
   buildScene(gl, u_ModelMatrix, u_NormalMatrix, global_x, global_y, global_z);
 
 }
 
+// Draw a box
 function drawbox(gl, u_ModelMatrix, u_NormalMatrix, n) {
   
+  //Push to the model Matrix
   pushMatrix(modelMatrix);
 
+    // Define u_ModelMatrix
     gl.uniformMatrix4fv(u_ModelMatrix, false, modelMatrix.elements);
 
+    // Define the normal matrix
     g_normalMatrix.setInverseOf(modelMatrix);
     g_normalMatrix.transpose();
     gl.uniformMatrix4fv(u_NormalMatrix, false, g_normalMatrix.elements);
 
+    // Render from triangles
     gl.drawElements(gl.TRIANGLES, n, gl.UNSIGNED_BYTE, 0);
 
+  // Pop from the model matrix
   modelMatrix = popMatrix();
 }
 
+// Initialize textures
 function initTexture(gl, u_Sampler, u_UseTextures, images){
 
+  // For each available image loaded earlier
   for(i=0; i<images.length; i++) {
+    // Create and bind the new texture
     var texture = gl.createTexture();
-
     // gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, 1);
     // gl.activeTexture(gl.TEXTURE0);
     gl.bindTexture(gl.TEXTURE_2D, texture);
 
+    // Try specifying texture image and error handling
     try {
       gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, images[i]);
     } catch(e) {
@@ -650,24 +766,32 @@ function initTexture(gl, u_Sampler, u_UseTextures, images){
         console.log(e);
     }
 
+    // Check image is size-compatible
     if(isPowerof2(images[i].width) && isPowerof2(images[i].height)) {
+      // Generate mipmap
       gl.generateMipmap(gl.TEXTURE_2D);
     } else {
+      // Wrap texture to fit
       gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
       gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
       gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
     }
 
+    // Clear Buffer bits
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+    
+    //Reset variables
     gl.uniform1i(u_Sampler, 0);
     gl.uniform1i(u_UseTextures, true);
-    //gl.drawElements(gl.TRIANGLES, n, gl.UNSIGNED_BYTE, 0);
 
+    // Push new texture to array
     textures.push(texture);
   }
 }
 
+// Build chair for scene
 function buildChair(gl, u_ModelMatrix, u_NormalMatrix, n, translate_x, translate_y, translate_z, face) {
+  // Bind texture to chair
   gl.bindTexture(gl.TEXTURE_2D, textures[6]);
 
   pushMatrix(modelMatrix);
@@ -676,6 +800,7 @@ function buildChair(gl, u_ModelMatrix, u_NormalMatrix, n, translate_x, translate
   drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
   modelMatrix = popMatrix();
 
+  // Change chair orientation
   if(face == "far"){
     pushMatrix(modelMatrix);
     modelMatrix.translate(translate_x, translate_y+0.5, translate_z);  
@@ -715,8 +840,11 @@ function buildChair(gl, u_ModelMatrix, u_NormalMatrix, n, translate_x, translate
   modelMatrix = popMatrix();
 }
 
+// Build floor for scene
 function buildFloor(gl, u_ModelMatrix, u_NormalMatrix, n, translate_x, translate_y, translate_z) {
+  // Bind texture to floor
   gl.bindTexture(gl.TEXTURE_2D, textures[0]);
+
   pushMatrix(modelMatrix);
   modelMatrix.translate(translate_x, translate_y-2.04, translate_z+2);
   modelMatrix.scale(25.0, 0.1, 27.0); 
@@ -724,8 +852,11 @@ function buildFloor(gl, u_ModelMatrix, u_NormalMatrix, n, translate_x, translate
   modelMatrix = popMatrix();
 }
 
+// Build table for scene
 function buildTable(gl, u_ModelMatrix, u_NormalMatrix, n, translate_x, translate_y, translate_z) {
+  // Bind texture to table
   gl.bindTexture(gl.TEXTURE_2D, textures[1]);
+
   pushMatrix(modelMatrix);
   modelMatrix.translate(translate_x, translate_y, translate_z);
   modelMatrix.scale(6.5, 0.5, 5.0); 
@@ -757,8 +888,11 @@ function buildTable(gl, u_ModelMatrix, u_NormalMatrix, n, translate_x, translate
   modelMatrix = popMatrix();
 }
 
+// Build lamp for scene
 function buildLamp(gl, u_ModelMatrix, u_NormalMatrix, n, translate_x, translate_y, translate_z) {  
+  // Bind texture to lamp base
   gl.bindTexture(gl.TEXTURE_2D, textures[7]);
+
   pushMatrix(modelMatrix);
   modelMatrix.translate(translate_x-0.75, translate_y-2, translate_z-0.75);
   modelMatrix.scale(2.0, 1, 2.0); 
@@ -771,6 +905,7 @@ function buildLamp(gl, u_ModelMatrix, u_NormalMatrix, n, translate_x, translate_
   drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
   modelMatrix = popMatrix();
 
+  // Bind texture to lamp head
   gl.bindTexture(gl.TEXTURE_2D, textures[8]);
 
   pushMatrix(modelMatrix);
@@ -780,8 +915,11 @@ function buildLamp(gl, u_ModelMatrix, u_NormalMatrix, n, translate_x, translate_
   modelMatrix = popMatrix();
 }
 
+// Build TV Stand for scene
 function buildTvStand(gl, u_ModelMatrix, u_NormalMatrix, n, translate_x, translate_y, translate_z) {
+  // Bind texture to TV Stand
   gl.bindTexture(gl.TEXTURE_2D, textures[3]);
+
   pushMatrix(modelMatrix);
   modelMatrix.translate(translate_x, translate_y, translate_z);
   modelMatrix.scale(3.0, 0.5, 10.0); 
@@ -795,8 +933,11 @@ function buildTvStand(gl, u_ModelMatrix, u_NormalMatrix, n, translate_x, transla
   modelMatrix = popMatrix();
 }
 
+// Build TV for scene
 function buildTv(gl, u_ModelMatrix, u_NormalMatrix, n, translate_x, translate_y, translate_z) {
+  // Bind texture to TV
   gl.bindTexture(gl.TEXTURE_2D, textures[4]);
+
   pushMatrix(modelMatrix);
   modelMatrix.translate(translate_x, translate_y, translate_z);
   modelMatrix.scale(1.0, 0.3, 6.0); 
@@ -839,18 +980,20 @@ function buildTv(gl, u_ModelMatrix, u_NormalMatrix, n, translate_x, translate_y,
   drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
   modelMatrix = popMatrix();
 
-  //v---- The Screen (May need a different texture to the body)
   pushMatrix(modelMatrix);
   modelMatrix.translate(translate_x+0.15, translate_y+1.4, translate_z-2.5);
   modelMatrix.scale(0.05, 4.0, 11.0); 
   drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
   modelMatrix = popMatrix();
 
+  // Build TV Screen
   buildTvScreen(gl, u_ModelMatrix, u_NormalMatrix, initVertexBuffers(gl), translate_x, translate_y, translate_z);
 
 }
 
+// Build TV Screen for TV
 function buildTvScreen(gl, u_ModelMatrix, u_NormalMatrix, n, translate_x, translate_y, translate_z) {
+  // Bind texture depending on animation screen status
   if(screenOn){
     gl.bindTexture(gl.TEXTURE_2D, textures[9]);
   } else {
@@ -864,14 +1007,18 @@ function buildTvScreen(gl, u_ModelMatrix, u_NormalMatrix, n, translate_x, transl
 
 }
 
+// Build TV remote for scene
 function buildRemote(gl, u_ModelMatrix, u_NormalMatrix, n, translate_x, translate_y, translate_z) {
+  // Bind texture to TV remote
   gl.bindTexture(gl.TEXTURE_2D, textures[4]);
+
   pushMatrix(modelMatrix);
   modelMatrix.translate(translate_x, translate_y-1.5, translate_z-1);  
   modelMatrix.scale(1.5, 0.5, 0.8);
   drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
   modelMatrix = popMatrix();
 
+  // Build buttons for TV remote
   buildButton(gl, u_ModelMatrix, u_NormalMatrix, n, translate_x+0.1, translate_y+0.5, translate_z+0.08)
   buildButton(gl, u_ModelMatrix, u_NormalMatrix, n, translate_x+1.2, translate_y+0.5, translate_z+0.08)
   buildButton(gl, u_ModelMatrix, u_NormalMatrix, n, translate_x+0.46, translate_y+0.5, translate_z+0.08)
@@ -882,8 +1029,11 @@ function buildRemote(gl, u_ModelMatrix, u_NormalMatrix, n, translate_x, translat
   buildButton(gl, u_ModelMatrix, u_NormalMatrix, n, translate_x+0.82, translate_y+0.5, translate_z+0.5)
 }
 
+// Build buttons for TV remote
 function buildButton(gl, u_ModelMatrix, u_NormalMatrix, n, translate_x, translate_y, translate_z) {
+  // Bind texture to TV remote buttons
   gl.bindTexture(gl.TEXTURE_2D, textures[11]);
+
   pushMatrix(modelMatrix);
   modelMatrix.translate(translate_x, translate_y-1.5, translate_z-1);  
   modelMatrix.scale(0.2, 0.05, 0.2);
@@ -891,6 +1041,7 @@ function buildButton(gl, u_ModelMatrix, u_NormalMatrix, n, translate_x, translat
   modelMatrix = popMatrix();
 }
 
+// Build Pouffe for scene
 function buildPouffe(gl, u_ModelMatrix, u_NormalMatrix, n, translate_x, translate_y, translate_z) {
   pushMatrix(modelMatrix);
   modelMatrix.translate(translate_x, translate_y-1.5, translate_z-1);  
@@ -898,14 +1049,18 @@ function buildPouffe(gl, u_ModelMatrix, u_NormalMatrix, n, translate_x, translat
   drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
   modelMatrix = popMatrix();
 
+  // Bind texture for Pouffe top
   gl.bindTexture(gl.TEXTURE_2D, textures[8]);
+
   pushMatrix(modelMatrix);
   modelMatrix.translate(translate_x-0.125, translate_y-0.5, translate_z-1.125);  
   modelMatrix.scale(3.25, 0.75, 3.25);
   drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
   modelMatrix = popMatrix();
 
+  // Bind texture for Pouffe Body
   gl.bindTexture(gl.TEXTURE_2D, textures[2]);
+
   pushMatrix(modelMatrix);
   modelMatrix.translate(translate_x+2.5, translate_y-2, translate_z+1.5);  
   modelMatrix.scale(0.5, 0.5, 0.5);
@@ -931,14 +1086,18 @@ function buildPouffe(gl, u_ModelMatrix, u_NormalMatrix, n, translate_x, translat
   modelMatrix = popMatrix();
 }
 
+// Build Plate setup for scene "C" animation
 function buildPlateSetup(gl, u_ModelMatrix, u_NormalMatrix, n, translate_x, translate_y, translate_z) {
+  //Bind texture for plates
   gl.bindTexture(gl.TEXTURE_2D, textures[10]);
+
   pushMatrix(modelMatrix);
   modelMatrix.translate(translate_x-12, translate_y+1.5, translate_z-1.5);  
   modelMatrix.scale(1.5, 0.15, 1.5);
   drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
   modelMatrix = popMatrix();
 
+  // Bind texture for cutlery
   gl.bindTexture(gl.TEXTURE_2D, textures[7]);
 
   pushMatrix(modelMatrix);
@@ -955,15 +1114,20 @@ function buildPlateSetup(gl, u_ModelMatrix, u_NormalMatrix, n, translate_x, tran
 
 }
 
+// Build sofa for scene
 function buildSofa(gl, u_ModelMatrix, u_NormalMatrix, n, translate_x, translate_y, translate_z) {
+  // Bind texture for sofa body
   gl.bindTexture(gl.TEXTURE_2D, textures[2]);
+  
   pushMatrix(modelMatrix);
   modelMatrix.translate(translate_x, translate_y-1.5, translate_z-1);  
   modelMatrix.scale(3.0, 1.25, 12);
   drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
   modelMatrix = popMatrix();
 
+  // Bind texture for Sofa Top
   gl.bindTexture(gl.TEXTURE_2D, textures[8]);
+
   pushMatrix(modelMatrix);
   modelMatrix.translate(translate_x, translate_y-0.5, translate_z+1.9);  
   modelMatrix.scale(3.125, 0.75, 2.95);
@@ -988,7 +1152,9 @@ function buildSofa(gl, u_ModelMatrix, u_NormalMatrix, n, translate_x, translate_
   drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
   modelMatrix = popMatrix();
 
+  // Bind texture for sofa body
   gl.bindTexture(gl.TEXTURE_2D, textures[2]);
+
   pushMatrix(modelMatrix);
   modelMatrix.translate(translate_x, translate_y-1.5, translate_z+11);  
   modelMatrix.scale(3.125, 3, 1);
@@ -1032,16 +1198,22 @@ function buildSofa(gl, u_ModelMatrix, u_NormalMatrix, n, translate_x, translate_
   modelMatrix = popMatrix();
 }
 
+// Build scene
 function buildScene(gl, u_ModelMatrix, u_NormalMatrix, global_x, global_y, global_z) {
+  // Build chairs
   buildChair(gl, u_ModelMatrix, u_NormalMatrix, initVertexBuffers(gl), global_x+1, global_y+0, global_z+chairPos1, "far");
   buildChair(gl, u_ModelMatrix, u_NormalMatrix, initVertexBuffers(gl), global_x+5, global_y+0, global_z+chairPos1, "far");
   buildChair(gl, u_ModelMatrix, u_NormalMatrix, initVertexBuffers(gl), global_x+1, global_y+0, global_z+chairPos2, "near");
   buildChair(gl, u_ModelMatrix, u_NormalMatrix, initVertexBuffers(gl), global_x+5, global_y+0, global_z+chairPos2, "near");
 
+  // Build TV and remote
   buildTv(gl, u_ModelMatrix, u_NormalMatrix, initVertexBuffers(gl), global_x+22.5, global_y+TVPos+0.5, global_z+10);
   buildRemote(gl, u_ModelMatrix, u_NormalMatrix, initVertexBuffers(gl), global_x+22+remotePos_x, global_y+2+Math.sin(rotateRem_y), global_z+17.5+Math.sin(rotateRem_z));
 
+  // Build table
   buildTable(gl, u_ModelMatrix, u_NormalMatrix, initVertexBuffers(gl), global_x+1, global_y+1, global_z+16);
+  
+  // Build plate setup for "C" animation
   if(platePresent){
     buildPlateSetup(gl, u_ModelMatrix, u_NormalMatrix, initVertexBuffers(gl), global_x+17, global_y+platePos, global_z+18);
     buildPlateSetup(gl, u_ModelMatrix, u_NormalMatrix, initVertexBuffers(gl), global_x+13.75, global_y+platePos, global_z+18);
@@ -1049,13 +1221,17 @@ function buildScene(gl, u_ModelMatrix, u_NormalMatrix, global_x, global_y, globa
     buildPlateSetup(gl, u_ModelMatrix, u_NormalMatrix, initVertexBuffers(gl), global_x+13.75, global_y+platePos, global_z+20);
   }
 
+  // Build lamp
   buildLamp(gl, u_ModelMatrix, u_NormalMatrix, initVertexBuffers(gl), global_x+23, global_y+0, global_z+2);
   buildLamp(gl, u_ModelMatrix, u_NormalMatrix, initVertexBuffers(gl), global_x+23, global_y+0, global_z+22);
   
+  // Build TV Stand
   buildTvStand(gl, u_ModelMatrix, u_NormalMatrix, initVertexBuffers(gl), global_x+21.5, global_y+0, global_z+8);
 
+  // Build sofa and pouffe
   buildSofa(gl, u_ModelMatrix, u_NormalMatrix, initVertexBuffers(gl), global_x+13, global_y, global_z+9);
   buildPouffe(gl, u_ModelMatrix, u_NormalMatrix, initVertexBuffers(gl), global_x+17, global_y+0, global_z+pouffePos);
  
+  // Build floor
   buildFloor(gl, u_ModelMatrix, u_NormalMatrix, initVertexBuffers(gl), global_x, global_y, global_z-2.5);
 }
