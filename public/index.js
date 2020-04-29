@@ -30,8 +30,8 @@ var VSHADER_SOURCE =
   '     vec3 normal = normalize((u_NormalMatrix * a_Normal).xyz);\n' +
   '     float nDotL = max(dot(normal, u_LightDirection), 0.0);\n' +
   '     vec3 diffuse = u_LightColor * a_Color.rgb * nDotL;\n' +
-  '     vec3 ambient = u_AmbientLight * a_Color.rgb;\n' +
-  '     v_Color = vec4(diffuse + ambient, a_Color.a);\n' +  
+  '     vec3 ambient = u_AmbientLight;\n' +
+  '     v_Color = vec4(diffuse + ambient, 1);\n' +  
   '  }\n' +
   '  else\n' +
   '  {\n' +
@@ -48,17 +48,20 @@ var VSHADER_SOURCE =
   'uniform vec3 u_lightColor;\n' +
   'uniform vec3 u_lightPosition;\n' +
   'uniform vec3 u_ambientLight;\n' +
+  'uniform float u_lightIntensity;\n' +
   'varying vec3 v_Normal;\n' +
   'varying vec3 v_Position;\n' +
   'varying vec4 v_Color;\n' +
   'varying vec2 v_TexCoord;\n' +
   'void main() {\n' +
   '  vec3 normal = normalize(v_Normal);\n' +
-  '  vec3 lightDirection = normalize(u_lightPosition - v_Position);\n' +
+  '  vec3 lightDirection = normalize(u_lightPosition - vec3(v_Position));\n' +
   '  float nDotL = max(dot(lightDirection, normal), 0.0);\n' +
   '  vec3 diffuse = u_lightColor * v_Color.rgb * nDotL;\n' +
   '  vec3 ambient = u_ambientLight * v_Color.rgb;\n' +
-  '  gl_FragColor = texture2D(u_Sampler, v_TexCoord);\n' +
+  '  vec4 textCol = texture2D(u_Sampler, v_TexCoord);\n' +
+  '  gl_FragColor = vec4(textCol.rgb * v_Color.rgb * u_lightIntensity, textCol.a);\n' +
+  //'  gl_FragColor = vec4(textCol.rgb * v_Color.rgb * nDotL, textCol.a);\n' +
   '}\n';
 
 // Initalise the display matrices
@@ -189,6 +192,8 @@ function main() {
     u_Sampler = gl.getUniformLocation(gl.program, 'u_Sampler');
     u_UseTextures = gl.getUniformLocation(gl.program, 'u_UseTextures');
     u_isLighting = gl.getUniformLocation(gl.program, 'u_isLighting');
+    u_LightsOff = gl.getUniformLocation(gl.program, 'u_LightsOff');
+    u_lightIntensity = gl.getUniformLocation(gl.program, 'u_lightIntensity');
 
     // Check uniform variable location retrieval
     if (!u_ModelMatrix || !u_ViewMatrix || !u_NormalMatrix || !u_ProjMatrix || !u_LightColor || !u_AmbientLight || !u_LightDirection || !u_isLighting) { 
@@ -196,11 +201,14 @@ function main() {
       return;
     }
 
+    initialIntensity = 1.0;
+
     // Specify initial values
-    gl.uniform3f(u_LightColor, 1.0, 1.0, 1.0);
-    gl.uniform3f(u_AmbientLight, 0.3, 0.3, 0.3);
+    gl.uniform1f(u_lightIntensity, initialIntensity);
+    gl.uniform3f(u_LightColor, 0, 0, 0);
+    gl.uniform3f(u_AmbientLight, 1, 1, 1);
     gl.uniform3fv(u_LightDirection, [0.5/7.5, 3.0/7.5, 4.0/7.5]);
-    gl.uniform3fv(u_LightPosition, [5.0/7.0, 1.0/7.0, 2.0/7.0]);
+    gl.uniform3fv(u_LightPosition, [5.0/8.0, 1.0/8.0, 2.0/8.0]);
 
     // Set look at and set perspective
     viewMatrix.setLookAt(a1_View, a2_View, a3_View, b1_View, b2_View, b3_View, c1_View, c2_View, c3_View);
@@ -500,14 +508,26 @@ function keydown(ev, gl, u_ViewMatrix) {
           moveRemote = true;
           break;
       case 80: //p (animate Pouffe)
-      if(pouffePos == 18) {
-        pouffeAway = true;
-      } 
-      else {
-        pouffeTowards = true;
-        }
+        if(pouffePos == 18) {
+          pouffeAway = true;
+        } 
+        else {
+          pouffeTowards = true;
+          }
+      case 76: //l (increase light intensity)
+        initialIntensity += 0.2;
+      case 75: // k (decrease light intensity)
+        initialIntensity -= 0.1;
       break;
     default: return;
+  }
+
+  // Set limits for light intensity
+  if (initialIntensity > 1) {
+    initialIntensity = 1;
+  }
+  if (initialIntensity < 0) {
+    initialIntensity = 0;
   }
 
   // Set look at for the view matrix with the updated variables
@@ -517,6 +537,10 @@ function keydown(ev, gl, u_ViewMatrix) {
   viewMatrix.rotate(g_yAngle, 0, 1, 0); 
   viewMatrix.rotate(g_xAngle, 1, 0, 0); 
   
+  // Update light intensity
+  console.log(initialIntensity);
+  gl.uniform1f(u_lightIntensity, initialIntensity);
+
   // Specify matrix values
   gl.uniformMatrix4fv(u_ViewMatrix, false, viewMatrix.elements); 
   }
@@ -556,35 +580,27 @@ function initVertexBuffers(gl) {
   // Create array for texture coordinates
   var verticesTexCoords = new Float32Array([ 
 
-    // 1.0, 1.0,   0.0, 1.0,   0.0, 0.0,   1.0, 0.0,
-    // 0.0, 1.0,   0.0, 0.0,   1.0, 0.0,   1.0, 1.0,
-    // 1.0, 0.0,   1.0, 1.0,   0.0, 1.0,   0.0, 0.0,
-    // 1.0, 1.0,   0.0, 1.0,   0.0, 0.0,   1.0, 0.0,
-    // 0.0, 0.0,   1.0, 0.0,   1.0, 1.0,   0.0, 1.0,
-    // 0.0, 0.0,   1.0, 0.0,   1.0, 1.0,   0.0, 1.0
-
-    1, 1, 1,  0, 1, 1,  0,0, 1,   1,0, 1, 
-    1, 1, 1,   1,0, 1,   1,0,0,   1, 1,0, 
-    1, 1, 1,  1, 1,0,  0, 1,0,  0, 1,1, 
-    0,1,1,  0,1,0,  0,0,0,  0,0,1, 
-    0,0,0,  1,0,0,   1,0,1,  0,0,1, 
-    1,0,0,  0,0,0,  0,1,0,   1,1,0
+    // Derived from normailzing the coordinates in vertices
+    1, 1, 1,   0, 1, 1,   0, 0, 1,   1, 0, 1, 
+    1, 1, 1,   1, 0, 1,   1, 0, 0,   1, 1, 0, 
+    1, 1, 1,   1, 1, 0,   0, 1, 0,   0, 1, 1, 
+    0, 1, 1,   0, 1, 0,   0 ,0, 0,   0, 0, 1, 
+    0, 0, 0,   1, 0, 0,   1, 0, 1,   0, 0, 1, 
+    1, 0, 0,   0, 0, 0,   0, 1, 0,   1, 1, 0
   ]);
+
   var n=36;
 
   if (!initArrayBuffer(gl, 'a_Position', vertices, 3, gl.FLOAT)) return -1;
   if (!initArrayBuffer(gl, 'a_Normal', normals, 3, gl.FLOAT)) return -1;
 
-  // Create texture coordinate buffer object and error handle
+  // Create texture coordinate buffer object
   var vertexTexCoordBuffer = gl.createBuffer();
-  if (!vertexTexCoordBuffer) {
-    console.log('Failed to create the buffer object');
-    return false;
-  }
-
-  // Create index buffer object and error handle
+  // Create index buffer object 
   var indexBuffer = gl.createBuffer();
-  if (!indexBuffer) {
+  
+  // Buffer error handling
+  if (!indexBuffer || !vertexTexCoordBuffer) {
       console.log('Failed to create the buffer object');
       return false;
   }
@@ -708,7 +724,7 @@ function popMatrix() {
 // Initialize drawing of scene
 function draw(gl, u_ModelMatrix, u_NormalMatrix, u_isLighting) {
 
-  // C;ear buffer bits
+  // Clear buffer bits
   gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
   
   // Set vertex information and error handling
