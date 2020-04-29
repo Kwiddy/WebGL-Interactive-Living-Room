@@ -49,6 +49,7 @@ var VSHADER_SOURCE =
   'uniform vec3 u_lightPosition;\n' +
   'uniform vec3 u_ambientLight;\n' +
   'uniform float u_lightIntensity;\n' +
+  'uniform float u_pointScale;\n' +
   'varying vec3 v_Normal;\n' +
   'varying vec3 v_Position;\n' +
   'varying vec4 v_Color;\n' +
@@ -56,11 +57,11 @@ var VSHADER_SOURCE =
   'void main() {\n' +
   '  vec3 normal = normalize(v_Normal);\n' +
   '  vec3 lightDirection = normalize(u_lightPosition - vec3(v_Position));\n' +
-  '  float nDotL = max(dot(lightDirection, normal), 0.0);\n' +
+  '  float nDotL = max(dot(lightDirection, normal), 0.0) * u_lightIntensity;\n' +
   '  vec3 diffuse = u_lightColor * v_Color.rgb * nDotL;\n' +
   '  vec3 ambient = u_ambientLight * v_Color.rgb;\n' +
   '  vec4 textCol = texture2D(u_Sampler, v_TexCoord);\n' +
-  '  gl_FragColor = vec4(textCol.rgb * v_Color.rgb * u_lightIntensity, textCol.a);\n' +
+  '  gl_FragColor = vec4(textCol.rgb * v_Color.rgb * u_lightIntensity + (nDotL * u_pointScale), textCol.a);\n' +
   //'  gl_FragColor = vec4(textCol.rgb * v_Color.rgb * nDotL, textCol.a);\n' +
   '}\n';
 
@@ -113,10 +114,6 @@ var u_Sampler;
 var u_UseTextures;
 var u_isLighting;
 var a_Position;
-
-// Initialize light variables
-var u_lightPosition = [0,0,0];
-var u_lightColor = [0,0,0];
 
 // Define booleans and limits for "C" animation
 var chairPos1 = 13;
@@ -194,6 +191,7 @@ function main() {
     u_isLighting = gl.getUniformLocation(gl.program, 'u_isLighting');
     u_LightsOff = gl.getUniformLocation(gl.program, 'u_LightsOff');
     u_lightIntensity = gl.getUniformLocation(gl.program, 'u_lightIntensity');
+    u_pointScale = gl.getUniformLocation(gl.program, 'u_pointScale');
 
     // Check uniform variable location retrieval
     if (!u_ModelMatrix || !u_ViewMatrix || !u_NormalMatrix || !u_ProjMatrix || !u_LightColor || !u_AmbientLight || !u_LightDirection || !u_isLighting) { 
@@ -201,10 +199,13 @@ function main() {
       return;
     }
 
+    // Set initial light intensities
     initialIntensity = 1.0;
+    pointIntensity = 0;
 
     // Specify initial values
     gl.uniform1f(u_lightIntensity, initialIntensity);
+    gl.uniform1f(u_pointScale, pointIntensity);
     gl.uniform3f(u_LightColor, 0, 0, 0);
     gl.uniform3f(u_AmbientLight, 1, 1, 1);
     gl.uniform3fv(u_LightDirection, [0.5/7.5, 3.0/7.5, 4.0/7.5]);
@@ -518,16 +519,26 @@ function keydown(ev, gl, u_ViewMatrix) {
         initialIntensity += 0.2;
       case 75: // k (decrease light intensity)
         initialIntensity -= 0.1;
+      case 77: // m (increase point light intensity)
+        pointIntensity += 0.2;
+      case 78: // n (decrease point light intensity)
+        pointIntensity -= 0.1;
       break;
     default: return;
   }
 
-  // Set limits for light intensity
+  // Restrict light intensity to limits
   if (initialIntensity > 1) {
     initialIntensity = 1;
   }
   if (initialIntensity < 0) {
     initialIntensity = 0;
+  }
+  if (pointIntensity > 1) {
+    pointIntensity = 1;
+  }
+  if (pointIntensity < 0) {
+    pointIntensity = 0;
   }
 
   // Set look at for the view matrix with the updated variables
@@ -538,8 +549,8 @@ function keydown(ev, gl, u_ViewMatrix) {
   viewMatrix.rotate(g_xAngle, 1, 0, 0); 
   
   // Update light intensity
-  console.log(initialIntensity);
   gl.uniform1f(u_lightIntensity, initialIntensity);
+  gl.uniform1f(u_pointScale, pointIntensity);
 
   // Specify matrix values
   gl.uniformMatrix4fv(u_ViewMatrix, false, viewMatrix.elements); 
