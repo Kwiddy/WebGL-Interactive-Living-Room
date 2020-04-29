@@ -49,7 +49,6 @@ var VSHADER_SOURCE =
   'uniform vec3 u_lightPosition;\n' +
   'uniform vec3 u_ambientLight;\n' +
   'uniform float u_lightIntensity;\n' +
-  'uniform float u_pointScale;\n' +
   'varying vec3 v_Normal;\n' +
   'varying vec3 v_Position;\n' +
   'varying vec4 v_Color;\n' +
@@ -57,11 +56,11 @@ var VSHADER_SOURCE =
   'void main() {\n' +
   '  vec3 normal = normalize(v_Normal);\n' +
   '  vec3 lightDirection = normalize(u_lightPosition - vec3(v_Position));\n' +
-  '  float nDotL = max(dot(lightDirection, normal), 0.0) * u_lightIntensity;\n' +
+  '  float nDotL = max(dot(lightDirection, normal), 0.0);\n' +
   '  vec3 diffuse = u_lightColor * v_Color.rgb * nDotL;\n' +
   '  vec3 ambient = u_ambientLight * v_Color.rgb;\n' +
   '  vec4 textCol = texture2D(u_Sampler, v_TexCoord);\n' +
-  '  gl_FragColor = vec4(textCol.rgb * v_Color.rgb * u_lightIntensity + (nDotL * u_pointScale), textCol.a);\n' +
+  '  gl_FragColor = vec4(textCol.rgb * v_Color.rgb * u_lightIntensity, 1.0);\n' +
   //'  gl_FragColor = vec4(textCol.rgb * v_Color.rgb * nDotL, textCol.a);\n' +
   '}\n';
 
@@ -114,6 +113,10 @@ var u_Sampler;
 var u_UseTextures;
 var u_isLighting;
 var a_Position;
+
+// Initialize light variables
+var u_lightPosition = [0,0,0];
+var u_lightColor = [0,0,0];
 
 // Define booleans and limits for "C" animation
 var chairPos1 = 13;
@@ -191,7 +194,6 @@ function main() {
     u_isLighting = gl.getUniformLocation(gl.program, 'u_isLighting');
     u_LightsOff = gl.getUniformLocation(gl.program, 'u_LightsOff');
     u_lightIntensity = gl.getUniformLocation(gl.program, 'u_lightIntensity');
-    u_pointScale = gl.getUniformLocation(gl.program, 'u_pointScale');
 
     // Check uniform variable location retrieval
     if (!u_ModelMatrix || !u_ViewMatrix || !u_NormalMatrix || !u_ProjMatrix || !u_LightColor || !u_AmbientLight || !u_LightDirection || !u_isLighting) { 
@@ -199,13 +201,10 @@ function main() {
       return;
     }
 
-    // Set initial light intensities
     initialIntensity = 1.0;
-    pointIntensity = 0;
 
     // Specify initial values
     gl.uniform1f(u_lightIntensity, initialIntensity);
-    gl.uniform1f(u_pointScale, pointIntensity);
     gl.uniform3f(u_LightColor, 0, 0, 0);
     gl.uniform3f(u_AmbientLight, 1, 1, 1);
     gl.uniform3fv(u_LightDirection, [0.5/7.5, 3.0/7.5, 4.0/7.5]);
@@ -519,26 +518,16 @@ function keydown(ev, gl, u_ViewMatrix) {
         initialIntensity += 0.2;
       case 75: // k (decrease light intensity)
         initialIntensity -= 0.1;
-      case 77: // m (increase point light intensity)
-        pointIntensity += 0.2;
-      case 78: // n (decrease point light intensity)
-        pointIntensity -= 0.1;
       break;
     default: return;
   }
 
-  // Restrict light intensity to limits
+  // Set limits for light intensity
   if (initialIntensity > 1) {
     initialIntensity = 1;
   }
   if (initialIntensity < 0) {
     initialIntensity = 0;
-  }
-  if (pointIntensity > 1) {
-    pointIntensity = 1;
-  }
-  if (pointIntensity < 0) {
-    pointIntensity = 0;
   }
 
   // Set look at for the view matrix with the updated variables
@@ -549,8 +538,8 @@ function keydown(ev, gl, u_ViewMatrix) {
   viewMatrix.rotate(g_xAngle, 1, 0, 0); 
   
   // Update light intensity
+  console.log(initialIntensity);
   gl.uniform1f(u_lightIntensity, initialIntensity);
-  gl.uniform1f(u_pointScale, pointIntensity);
 
   // Specify matrix values
   gl.uniformMatrix4fv(u_ViewMatrix, false, viewMatrix.elements); 
@@ -568,75 +557,70 @@ function initVertexBuffers(gl) {
     0.5,-0.5,-0.5,  -0.5,-0.5,-0.5,  -0.5, 0.5,-0.5,   0.5, 0.5,-0.5  
   ]);
   
-  // Create normals array
-  var normals = new Float32Array([    
-    0.0, 0.0, 1.0,   0.0, 0.0, 1.0,   0.0, 0.0, 1.0,   0.0, 0.0, 1.0,  
-    1.0, 0.0, 0.0,   1.0, 0.0, 0.0,   1.0, 0.0, 0.0,   1.0, 0.0, 0.0,  
-    0.0, 1.0, 0.0,   0.0, 1.0, 0.0,   0.0, 1.0, 0.0,   0.0, 1.0, 0.0,  
-    -1.0, 0.0, 0.0,  -1.0, 0.0, 0.0,  -1.0, 0.0, 0.0,  -1.0, 0.0, 0.0,  
-    0.0,-1.0, 0.0,   0.0,-1.0, 0.0,   0.0,-1.0, 0.0,   0.0,-1.0, 0.0,  
-    0.0, 0.0,-1.0,   0.0, 0.0,-1.0,   0.0, 0.0,-1.0,   0.0, 0.0,-1.0   
+  // Colors
+  var colors = new Float32Array([
+    1, 0, 0,   1, 0, 0,   1, 0, 0,  1, 0, 0,     // v0-v1-v2-v3 front
+    1, 0, 0,   1, 0, 0,   1, 0, 0,  1, 0, 0,     // v0-v3-v4-v5 right
+    1, 0, 0,   1, 0, 0,   1, 0, 0,  1, 0, 0,     // v0-v5-v6-v1 up
+    1, 0, 0,   1, 0, 0,   1, 0, 0,  1, 0, 0,     // v1-v6-v7-v2 left
+    1, 0, 0,   1, 0, 0,   1, 0, 0,  1, 0, 0,     // v7-v4-v3-v2 down
+    1, 0, 0,   1, 0, 0,   1, 0, 0,  1, 0, 0　    // v4-v7-v6-v5 back
+ ]);
+
+  // Normal
+  var normals = new Float32Array([
+    0.0, 0.0, 1.0,   0.0, 0.0, 1.0,   0.0, 0.0, 1.0,   0.0, 0.0, 1.0,  // v0-v1-v2-v3 front
+    1.0, 0.0, 0.0,   1.0, 0.0, 0.0,   1.0, 0.0, 0.0,   1.0, 0.0, 0.0,  // v0-v3-v4-v5 right
+    0.0, 1.0, 0.0,   0.0, 1.0, 0.0,   0.0, 1.0, 0.0,   0.0, 1.0, 0.0,  // v0-v5-v6-v1 up
+   -1.0, 0.0, 0.0,  -1.0, 0.0, 0.0,  -1.0, 0.0, 0.0,  -1.0, 0.0, 0.0,  // v1-v6-v7-v2 left
+    0.0,-1.0, 0.0,   0.0,-1.0, 0.0,   0.0,-1.0, 0.0,   0.0,-1.0, 0.0,  // v7-v4-v3-v2 down
+    0.0, 0.0,-1.0,   0.0, 0.0,-1.0,   0.0, 0.0,-1.0,   0.0, 0.0,-1.0   // v4-v7-v6-v5 back
   ]);
-  
-  // Create indices array
+
+  // Texture Coordinates
+  var texCoords = new Float32Array([
+    1.0, 1.0,    0.0, 1.0,   0.0, 0.0,   1.0, 0.0,  // v0-v1-v2-v3 front
+    0.0, 1.0,    0.0, 0.0,   1.0, 0.0,   1.0, 1.0,  // v0-v3-v4-v5 right
+    1.0, 0.0,    1.0, 1.0,   0.0, 1.0,   0.0, 0.0,  // v0-v5-v6-v1 up
+    1.0, 1.0,    0.0, 1.0,   0.0, 0.0,   1.0, 0.0,  // v1-v6-v7-v2 left
+    0.0, 0.0,    1.0, 0.0,   1.0, 1.0,   0.0, 1.0,  // v7-v4-v3-v2 down
+    0.0, 0.0,    1.0, 0.0,   1.0, 1.0,   0.0, 1.0   // v4-v7-v6-v5 back
+  ]);
+
+  // Indices of the vertices
   var indices = new Uint8Array([
-    0, 1, 2,   0, 2, 3,    
-    4, 5, 6,   4, 6, 7,    
-    8, 9,10,   8,10,11,    
-    12,13,14,  12,14,15,    
-    16,17,18,  16,18,19,    
-    20,21,22,  20,22,23     
-  ]);
+     0, 1, 2,   0, 2, 3,    // front
+     4, 5, 6,   4, 6, 7,    // right
+     8, 9,10,   8,10,11,    // up
+    12,13,14,  12,14,15,    // left
+    16,17,18,  16,18,19,    // down
+    20,21,22,  20,22,23     // back
+ ]);
 
-  // Create array for texture coordinates
-  var verticesTexCoords = new Float32Array([ 
+  // Write the vertex property to buffers (coordinates, colors and normals)
+  if (!initArrayBuffer(gl, 'a_Position', vertices, 3)) return -1;
+  if (!initArrayBuffer(gl, 'a_Color', colors, 3)) return -1;
+  if (!initArrayBuffer(gl, 'a_Normal', normals, 3)) return -1;
+  if (!initArrayBuffer(gl, 'a_TexCoord', texCoords, 2)) return -1;
 
-    // Derived from normailzing the coordinates in vertices
-    1, 1, 1,   0, 1, 1,   0, 0, 1,   1, 0, 1, 
-    1, 1, 1,   1, 0, 1,   1, 0, 0,   1, 1, 0, 
-    1, 1, 1,   1, 1, 0,   0, 1, 0,   0, 1, 1, 
-    0, 1, 1,   0, 1, 0,   0 ,0, 0,   0, 0, 1, 
-    0, 0, 0,   1, 0, 0,   1, 0, 1,   0, 0, 1, 
-    1, 0, 0,   0, 0, 0,   0, 1, 0,   1, 1, 0
-  ]);
 
-  var n=36;
+  // Unbind the buffer object
+  gl.bindBuffer(gl.ARRAY_BUFFER, null);
 
-  if (!initArrayBuffer(gl, 'a_Position', vertices, 3, gl.FLOAT)) return -1;
-  if (!initArrayBuffer(gl, 'a_Normal', normals, 3, gl.FLOAT)) return -1;
-
-  // Create texture coordinate buffer object
-  var vertexTexCoordBuffer = gl.createBuffer();
-  // Create index buffer object 
+  // Write the indices to the buffer object
   var indexBuffer = gl.createBuffer();
-  
-  // Buffer error handling
-  if (!indexBuffer || !vertexTexCoordBuffer) {
-      console.log('Failed to create the buffer object');
-      return false;
+  if (!indexBuffer) {
+    console.log('Failed to create the buffer object');
+    return false;
   }
-
-  // Bind buffers and assign buffer data
   gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indexBuffer);
   gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, indices, gl.STATIC_DRAW);
-  gl.bindBuffer(gl.ARRAY_BUFFER, vertexTexCoordBuffer);
-  gl.bufferData(gl.ARRAY_BUFFER, verticesTexCoords, gl.STATIC_DRAW);
 
-  // Bind vertexTexCoordBuffer
-  gl.vertexAttribPointer(a_Position, 3, gl.FLOAT, false, 0, 0);
-  gl.enableVertexAttribArray(a_Position);
-
-  // store tex coordinate location
-  var a_TexCoord = gl.getAttribLocation(gl.program, 'a_TexCoord');
-
-  gl.vertexAttribPointer(a_TexCoord, 3, gl.FLOAT, false, 0, 0);
-  gl.enableVertexAttribArray(a_TexCoord);
-
-  return n;
+  return indices.length;
 }
 
 // Initialize array buffer
-function initArrayBuffer (gl, attribute, data, num, type) {
+function initArrayBuffer (gl, attribute, data, num) {
   // Create buffer and error handle
   var buffer = gl.createBuffer();
   if (!buffer) {
@@ -657,7 +641,7 @@ function initArrayBuffer (gl, attribute, data, num, type) {
   }
 
   // binds buffer to attribute
-  gl.vertexAttribPointer(a_attribute, num, type, false, 0, 0);
+  gl.vertexAttribPointer(a_attribute, num, gl.FLOAT, false, 0, 0);
   gl.enableVertexAttribArray(a_attribute);
 
   // reset the array buffer
@@ -712,7 +696,7 @@ function initAxesVertexBuffers(gl) {
   }
 
   // Bind vertexColorBuffer to a_color
-  gl.vertexAttribPointer(a_Color, 2, gl.FLOAT, false, FSIZE * 6, FSIZE * 3);
+  gl.vertexAttribPointer(a_Color, 2, gl.FLOAT, false, FSIZE * 6, 0);
   gl.enableVertexAttribArray(a_Color);  
 
   // Reset ARRAY_BUFFER
@@ -738,12 +722,12 @@ function draw(gl, u_ModelMatrix, u_NormalMatrix, u_isLighting) {
   // Clear buffer bits
   gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
   
-  // Set vertex information and error handling
-  var n = initAxesVertexBuffers(gl);
-  if (n < 0) {
-    console.log('Failed to set the vertex information');
-    return;
-  }
+//   // Set vertex information and error handling
+//   var n = initAxesVertexBuffers(gl);
+//   if (n < 0) {
+//     console.log('Failed to set the vertex information');
+//     return;
+//   }
   
   // Set is lighting to true
   gl.uniform1i(u_isLighting, true); 
