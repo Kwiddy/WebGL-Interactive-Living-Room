@@ -25,4 +25,9 @@ arrow keys
 - Press T to turn on the television. A remote will slide out from beneath the TV and rotate in the air, after which the TV display will change.
 
 **The Scene:**
-- The scene has 15 objects where 11 are animation. These animated objects are: 4 chairs, 1 pouffe, 1 TV, 1 TV remote, 4 plates & cutlery. The objects not animated include: 1 lamp, 1 table, 1 sofa, 1 TV stand. 
+- The scene has 15 objects where 11 are animated. These animated objects are: 4 chairs, 1 pouffe, 1 TV, 1 TV remote, 4 plates & cutlery. The objects not animated include: 1 lamp, 1 table, 1 sofa, 1 TV stand. 
+
+**External Resources Adopted**:
+- In the creation of my program I have used no external modelling software nor have I used any external libraries. 
+- I have used several general textures which can be found in *public/textures/*. These are sample textures for the program and are very simplistic, themselves and alternatives can easily be found on *Google Images*. The only non-simple texture is for the TV screen when activated which displayes a logo from *BBC News*.
+- When developing the program, I used several forums and youtube videos for teaching myself appropriate methods, and build upon the methods demonstrated in several of the module's practicals.
