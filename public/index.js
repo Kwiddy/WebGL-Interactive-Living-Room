@@ -79,14 +79,14 @@ var textures = [];
 var images = [];
 
 // Global x, y, and z coordinates for scene construction
-var global_x = 0;
-var global_y = 0;
-var global_z = 0;
+var global_x = -11;
+var global_y = -4;
+var global_z = 8;
 
-// Create view variables for camera manipulation
-var a1_View = 0;
-var a2_View = 5;
-var a3_View = 60;
+// Initialize view variables for camera manipulation
+var a1_View = -14;
+var a2_View = 0;
+var a3_View = 55;
 var b1_View = 0;
 var b2_View = 0;
 var b3_View = -100;
@@ -268,7 +268,7 @@ function main() {
     img9.src = "textures/beige_256x256.jpg"
 
     //TV Screen Texture (On)
-    img10.src = "textures/blue_256x256.jpg"
+    img10.src = "textures/bbcnews_512x512.jpg"
 
     //Plate white and cup white
     img11.src = "textures/white_256x256.jpg"
@@ -515,15 +515,19 @@ function keydown(ev, gl, u_ViewMatrix) {
         else {
           pouffeTowards = true;
           }
+        break;
       case 76: //l (increase light intensity)
         initialIntensity += 0.2;
+        break;
       case 75: // k (decrease light intensity)
         initialIntensity -= 0.1;
+        break;
       case 77: // m (increase point light intensity)
-        pointIntensity += 0.2;
+        pointIntensity += 0.1;
+        break;
       case 78: // n (decrease point light intensity)
         pointIntensity -= 0.1;
-      break;
+        break;
     default: return;
   }
 
@@ -1214,7 +1218,6 @@ function buildScene(gl, u_ModelMatrix, u_NormalMatrix, global_x, global_y, globa
 
   // // Build lamp
   buildLamp(gl, u_ModelMatrix, u_NormalMatrix, initVertexBuffers(gl), global_x+11, global_y-1.5, global_z-8);
-  buildLamp(gl, u_ModelMatrix, u_NormalMatrix, initVertexBuffers(gl), global_x+11, global_y-1.5, global_z+12);
   
   // Build TV Stand
   buildTvStand(gl, u_ModelMatrix, u_NormalMatrix, initVertexBuffers(gl), global_x+11, global_y+1.25, global_z+2);
