@@ -4,7 +4,7 @@
 </center>
 
 **Running the program**:
-- From the highest level of the coursework, i.e. not in the public folder, run *npm start*. You may first need to run *npm install* to download the correct node_modules.
+- From the highest level of the coursework, i.e. outside of the public folder, run *npm start*. You may first need to run *npm install* to download the correct node_modules.
 - The server should now be running on port 8888
 - On a browser of your choice (tested on Google chrome) navigate to:
     http://localhost:8888/
